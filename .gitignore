@@ -1,0 +1,12 @@
+.gitignore
+.DS_Store
+
+/vendor
+.env
+
+.idea/
+#app.json
+_ide*
+.phpstorm*
+public/docs/*
+
