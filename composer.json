@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": "^7.4",
-        "laravel/passport": "^8.0"
+        "laravel/passport": "^9.*"
     },
     "autoload": {
         "psr-4": {
