@@ -1,21 +1,15 @@
-### Saas Monomer is a intergred tool to quickly bootstrap your SAAS project.
+## Saas Monomer is a intergred tool to quickly bootstrap your SAAS project.
 
-The Skeleton looks like this:
-
-* app/Services/{Object}Service
-    * ./Contracts
-        * {Object}ServiceContract.php
-    * ./Providers
-        * {Object}ServiceProvider.php
-    * ./Facades
-        * {Object}Service.php
-    * ./Models
-    * ./Databases
-    * ./Drivers
-    * ./Channels
-    * {Object}Service.php
 
 Please run "composer require" command to include this package.
-> composer require artisan-cloud/service-maker --dev
+~~~
+composer require artisan-cloud/saas-monomer
+~~~
 
-we recommend using "--dev" as your development tool.
+
+### Monomer will include these features:
+* OAUTH2 (Passport)
+* Support multi-tenant with multi-database separately
+* Support subdomain with each multi-tenant 
+* Using queue-worker model designed
+
