@@ -8,4 +8,4 @@
 * Using queue-worker model designed
 
 
-[Quick Guide](https://laravel.com/docs/passport)
+[Quick Guide](https://github.com/ArtisanCloud/SaaSMonomer/wiki/Quick-Guide)
