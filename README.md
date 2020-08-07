@@ -8,4 +8,4 @@
 * Using queue-worker model designed
 
 
-[Quick Guide](https://github.com/ArtisanCloud/ServiceMonomer/wiki/Quick-Guide)
+[Quick Guide](https://laravel.com/docs/passport)
