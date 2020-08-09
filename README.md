@@ -9,3 +9,9 @@
 * Using queue-worker model designed
 
 
+### Please publish SaaS Monomer after installtion.
+~~~
+php artisan vendor:publish --tag=SaaSMonomer
+~~~
+
+It will make servial sub-package installed.

@@ -1,10 +1,10 @@
 <?php
 
-namespace ArtisanCloud\SaaSMonomer\Contracts;
+namespace ArtisanCloud\SaaSMonomer\Services\TenantService\src\Contracts;
 
 /**
  * Interface TenantServiceContract
- * @package ArtisanCloud\SaaSMonomer\Contracts
+ * @package ArtisanCloud\SaaSMonomer\Services\TenantService\src\Contracts
  */
 interface TenantServiceContract
 {

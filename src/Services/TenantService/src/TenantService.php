@@ -1,12 +1,12 @@
 <?php
 
-namespace ArtisanCloud\SaaSMonomer;
+namespace ArtisanCloud\SaaSMonomer\Services\TenantService\src;
 
-use ArtisanCloud\SaaSMonomer\Contracts\TenantServiceContract;
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Contracts\TenantServiceContract;
 
 /**
  * Class TenantService
- * @package ArtisanCloud\SaaSMonomer
+ * @package ArtisanCloud\SaaSMonomer\Services\TenantService\src
  */
 class TenantService implements TenantServiceContract
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace ArtisanCloud\SaaSMonomer\Facades;
+namespace ArtisanCloud\SaaSMonomer\Services\TenantService\src\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
  * Class TenantService
- * @package ArtisanCloud\SaaSMonomer
+ * @package ArtisanCloud\SaaSMonomer\Services\TenantService\src
  */
 class TenantService extends Facade
 {

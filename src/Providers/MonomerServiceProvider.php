@@ -4,9 +4,9 @@ namespace ArtisanCloud\SaaSMonomer\Providers;
 
 use ArtisanCloud\SaaSMonomer\Console\Commands\SaaSMonomerCommand;
 use Illuminate\Support\ServiceProvider;
-use ArtisanCloud\TestService\Contracts\TestServiceContract;
-use ArtisanCloud\TestService\TestService;
 use Laravel\Passport\Passport;
+
+use ArtisanCloud\SaaSMonomer\Services\PolymerService\src\Providers\PolymerServiceProvider;
 
 /**
  * Class MonomerServiceProvider
@@ -14,6 +14,7 @@ use Laravel\Passport\Passport;
  */
 class MonomerServiceProvider extends ServiceProvider
 {
+
     /**
      * Register services.
      *
@@ -22,6 +23,9 @@ class MonomerServiceProvider extends ServiceProvider
     public function register()
     {
         //
+//        $this->app->register(
+//            TenantServiceProvider::class
+//        );
     }
 
     /**
@@ -33,7 +37,14 @@ class MonomerServiceProvider extends ServiceProvider
     {
 
         // make sure passport is installed
-        Passport::routes();
+        Passport::routes(function ($router) {
+            // RouteRegistrar->forAccessTokens()
+            $router->forAccessTokens();
+        }, ['middleware' => 'checkHeader']);
+        Passport::tokensExpireIn(now()->addDays(90));
+        Passport::refreshTokensExpireIn(now()->addDays(90));
+
+
 
         if ($this->app->runningInConsole()) {
             // publish config file
@@ -46,10 +57,5 @@ class MonomerServiceProvider extends ServiceProvider
             }
 
         }
-
-//        $this->app->bind(
-//            TestServiceContract::class,
-//            TestService::class
-//        );
     }
 }
