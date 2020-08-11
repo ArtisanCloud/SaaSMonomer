@@ -1,0 +1,11 @@
+<?php
+
+namespace {{serviceNamespace}}\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class {{Model}} extends Model
+{
+  // Disable Laravel's mass assignment protection
+  protected $guarded = [];
+}

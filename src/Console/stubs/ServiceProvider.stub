@@ -1,0 +1,52 @@
+<?php
+
+namespace {{serviceNamespace}}\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use {{serviceNamespace}}\Contracts\{{serviceName}}Contract;
+use {{serviceNamespace}}\{{serviceName}};
+
+/**
+ * Class {{serviceName}}Provider
+ * @package App\Providers
+ */
+class {{serviceName}}Provider extends ServiceProvider
+{
+    /**
+     * Register services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //
+        $this->app->bind(
+            {{serviceName}}Contract::class,
+            {{serviceName}}::class
+        );
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        if ($this->app->runningInConsole()) {
+              // publish config file
+              $this->publishes([
+                  __DIR__ . '/../../config/{{model}}.php' => "/../" . config_path('{{model}}.php'),
+              ], ['{{Tag}}', '{{Model}}-Model']);
+
+              // register artisan command
+              if (! class_exists('Create{{Model}}Table')) {
+                $this->publishes([
+                  __DIR__ . '/../../database/migrations/create_{{model}}s_table.php.stub' => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_{{model}}s_table.php'),
+                  // you can add any number of migrations here
+                ], ['{{Tag}}', '{{Model}}-Migration']);
+              }
+            }
+
+    }
+}

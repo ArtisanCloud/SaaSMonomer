@@ -2,9 +2,11 @@
 
 namespace ArtisanCloud\SaaSMonomer\Providers;
 
-use ArtisanCloud\SaaSMonomer\Console\Commands\SaaSMonomerCommand;
-use Illuminate\Support\ServiceProvider;
+use ArtisanCloud\SaaSMonomer\Console\Commands\SaasMonomerInstallCommand;
 use Laravel\Passport\Passport;
+
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\ServiceProvider;
 
 use ArtisanCloud\SaaSMonomer\Services\PolymerService\src\Providers\PolymerServiceProvider;
 
@@ -47,15 +49,14 @@ class MonomerServiceProvider extends ServiceProvider
 
 
         if ($this->app->runningInConsole()) {
-            // publish config file
 
-            if ($this->app->runningInConsole()) {
+            $this->commands([
+                SaasMonomerInstallCommand::class,
+            ]);
 
 //                $this->publishes([
 //                    __DIR__ . '/../'.SaaSMonomerCommand::FOLDER_MIGRATION.'/migrations' => "/../" . app_path(),
 //                ], 'saas-monomer-migrations');
-            }
-
         }
     }
 }

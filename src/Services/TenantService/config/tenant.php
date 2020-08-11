@@ -3,4 +3,5 @@
 
 return [
 
+    'table_prefix' => 'ac'
 ];

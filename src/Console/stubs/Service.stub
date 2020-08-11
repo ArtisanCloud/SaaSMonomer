@@ -1,0 +1,14 @@
+<?php
+
+namespace {{serviceNamespace}};
+
+use {{serviceNamespace}}\Contracts\{{serviceName}}Contract;
+
+/**
+ * Class {{serviceName}}
+ * @package {{serviceNamespace}}
+ */
+class {{serviceName}} implements {{serviceName}}Contract
+{
+    //
+}
