@@ -52,9 +52,10 @@ class MonomerServiceProvider extends ServiceProvider
 //                SaasMonomerInstallCommand::class,
 //            ]);
 
-//                $this->publishes([
-//                    __DIR__ . '/../'.SaaSMonomerCommand::FOLDER_MIGRATION.'/migrations' => "/../" . app_path(),
-//                ], 'saas-monomer-migrations');
+            $this->publishes([
+                __DIR__ . '/../../config/monomer.php' => "/../" . config_path('artisancloud/monomer.php'),
+            ], ['SaaSMonomer', 'Landlord-Config']);
+
         }
     }
 }
