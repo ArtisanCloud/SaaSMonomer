@@ -2,6 +2,8 @@
 
 namespace ArtisanCloud\SaaSMonomer\Providers;
 
+use ArtisanCloud\SaaSMonomer\Services\TeamService\src\Providers\TeamServiceProvider;
+use ArtisanCloud\SaaSMonomer\Services\UserService\src\Providers\UserServiceProvider;
 use ArtisanCloud\SaaSMonomer\Console\Commands\SaasMonomerInstallCommand;
 use Laravel\Passport\Passport;
 
@@ -26,6 +28,8 @@ class MonomerServiceProvider extends ServiceProvider
 //        $this->app->register(
 //            TenantServiceProvider::class
 //        );
+        $this->app->register(UserServiceProvider::class);
+        $this->app->register(TeamServiceProvider::class);
     }
 
     /**
@@ -35,6 +39,8 @@ class MonomerServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
+        $this->loadRoutesFrom(__DIR__.'/../../routes/api.php');
 
         // make sure passport is installed
         Passport::routes(function ($router) {
