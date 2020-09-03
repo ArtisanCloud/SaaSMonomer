@@ -17,18 +17,19 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-$_methodAll = config('artisancloud.framework.methodAll');
-$_methodGet = config('artisancloud.framework.methodGet');
-$_methodPost = config('artisancloud.framework.methodPost');
-$_methodPut = config('artisancloud.framework.methodPut');
-$_methodDelete = config('artisancloud.framework.methodDelete');
-$_API_VERSION = config('artisancloud.framework.API_VERSION');
+$_methodAll = config('artisancloud.framework.router.methodAll');
+$_methodGet = config('artisancloud.framework.router.methodGet');
+$_methodPost = config('artisancloud.framework.router.methodPost');
+$_methodPut = config('artisancloud.framework.router.methodPut');
+$_methodDelete = config('artisancloud.framework.router.methodDelete');
+$_api_version = config('artisancloud.framework.api_version');
 $_namespaceAPI = 'ArtisanCloud\SaaSMonomer\Http\Controllers\API';
 
 /** Rou **/
 Route::group(
     [
         'namespace' => $_namespaceAPI,
+        'prefix' => "api/{$_api_version}",
 //        'domain' => $_WHITE_LIST_DOMAIN,
         'middleware' => ['checkHeader', 'auth:api', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
