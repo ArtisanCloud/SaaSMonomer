@@ -25,13 +25,14 @@ $_methodDelete = config('artisancloud.framework.router.methodDelete');
 $_api_version = config('artisancloud.framework.api_version');
 $_namespaceAPI = 'ArtisanCloud\SaaSMonomer\Http\Controllers\API';
 
+$_domain_tenant = config('artisancloud.framework.domain.tenant');
 
 /** Tenant **/
 Route::group(
     [
         'namespace' => $_namespaceAPI,
         'prefix' => "api/{$_api_version}",
-        'domain' => $_tenant_domain,
+        'domain' => $_domain_tenant,
         'middleware' => ['checkHeader', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
 
@@ -43,7 +44,7 @@ Route::group(
     [
         'namespace' => $_namespaceAPI,
         'prefix' => "api/{$_api_version}",
-        'domain' => $_tenant_domain,
+        'domain' => $_domain_tenant,
         'middleware' => ['checkHeader', 'auth:api', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
 
