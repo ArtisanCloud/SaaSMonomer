@@ -25,15 +25,27 @@ $_methodDelete = config('artisancloud.framework.router.methodDelete');
 $_api_version = config('artisancloud.framework.api_version');
 $_namespaceAPI = 'ArtisanCloud\SaaSMonomer\Http\Controllers\API';
 
-/** Rou **/
+
+/** Tenant **/
 Route::group(
     [
         'namespace' => $_namespaceAPI,
         'prefix' => "api/{$_api_version}",
-//        'domain' => $_WHITE_LIST_DOMAIN,
-        'middleware' => ['checkHeader', 'auth:api', 'checkUser']
+        'domain' => $_tenant_domain,
+        'middleware' => ['checkHeader', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
 
     Route::match($_methodPost, 'user/register', 'UserAPIController@apiRegister')->name('user.write.register');
+});
 
+
+Route::group(
+    [
+        'namespace' => $_namespaceAPI,
+        'prefix' => "api/{$_api_version}",
+        'domain' => $_tenant_domain,
+        'middleware' => ['checkHeader', 'auth:api', 'checkUser']
+    ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
+
+//    Route::match($_methodPost, 'invitation/generate', 'InvitationCodeAPIController@apiBatchGenerateCode')->name('code.write.invitation.generate');
 });
