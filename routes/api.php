@@ -35,8 +35,7 @@ Route::group(
         'domain' => $_domain_tenant,
         'middleware' => ['checkHeader', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
-
-    Route::match($_methodPost, 'user/register', 'UserAPIController@apiRegister')->name('user.write.register');
+        
 });
 
 

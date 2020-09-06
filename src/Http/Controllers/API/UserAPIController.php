@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace ArtisanCloud\SaaSMonomer\Http\Controllers\API;
 
 
+use ArtisanCloud\SaaSFramework\Http\Requests\RequestUserRegister;
+use ArtisanCloud\SaaSFramework\Http\Requests\RequestUserRegisterInvitation;
 use ArtisanCloud\SaaSFramework\Http\Controllers\API\APIController;
 use ArtisanCloud\SaaSFramework\Http\Controllers\API\APIResponse;
 
@@ -49,6 +51,13 @@ class UserAPIController extends APIController
 
         return $this->m_apiResponse->toResponse();
 
+    }
+
+    public function apiRegisterInvitation(RequestUserRegisterInvitation $request)
+    {
+        dd($request->all());
+
+        return $this->m_apiResponse->toResponse();
     }
 
 

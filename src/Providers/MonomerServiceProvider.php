@@ -28,7 +28,6 @@ class MonomerServiceProvider extends ServiceProvider
 //        $this->app->register(
 //            TenantServiceProvider::class
 //        );
-        $this->app->register(UserServiceProvider::class);
         $this->app->register(TeamServiceProvider::class);
     }
 
@@ -41,17 +40,7 @@ class MonomerServiceProvider extends ServiceProvider
     {
 
         $this->loadRoutesFrom(__DIR__.'/../../routes/api.php');
-
-        // make sure passport is installed
-        Passport::routes(function ($router) {
-            // RouteRegistrar->forAccessTokens()
-            $router->forAccessTokens();
-        }, ['middleware' => 'checkHeader']);
-        Passport::tokensExpireIn(now()->addDays(90));
-        Passport::refreshTokensExpireIn(now()->addDays(90));
-
-
-
+        
         if ($this->app->runningInConsole()) {
 
 //            $this->commands([
@@ -60,7 +49,7 @@ class MonomerServiceProvider extends ServiceProvider
 
             $this->publishes([
                 __DIR__ . '/../../config/monomer.php' => "/../" . config_path('artisancloud/monomer.php'),
-            ], ['SaaSMonomer', 'Landlord-Config']);
+            ], ['ArtisanCloud','SaaSMonomer', 'Landlord-Config']);
 
         }
     }

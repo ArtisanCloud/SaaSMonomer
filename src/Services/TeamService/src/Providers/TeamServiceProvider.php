@@ -44,7 +44,7 @@ class TeamServiceProvider extends ServiceProvider
                 $this->publishes([
                   __DIR__ . '/../../database/migrations/create_teams_table.php' => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_teams_table.php'),
                   // you can add any number of migrations here
-                ], ['SaaSFramework', 'Team-Migration']);
+                ], ['ArtisanCloud','SaaSMonomer', 'Team-Migration']);
               }
             }
 
