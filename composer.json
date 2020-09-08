@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": "^7.4",
-        "laravel/passport": "^9.3"
+        "laravel/passport": "^10.0"
     },
     "autoload": {
         "psr-4": {
@@ -20,6 +20,14 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.2"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ArtisanCloud\\SaaSMonomer\\Providers\\MonomerServiceProvider"
+            ]
+        }
     }
+
 }
 
