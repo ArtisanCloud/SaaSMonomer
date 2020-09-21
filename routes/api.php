@@ -47,5 +47,6 @@ Route::group(
         'middleware' => ['checkHeader', 'auth:api', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
 
-//    Route::match($_methodPost, 'invitation/generate', 'InvitationCodeAPIController@apiBatchGenerateCode')->name('code.write.invitation.generate');
+    Route::match($_methodPost, 'invitation/generate', 'InvitationCodeAPIController@apiBatchGenerateCode')->name('code.write.invitation.generate');
+    
 });
