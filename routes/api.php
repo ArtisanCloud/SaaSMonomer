@@ -17,11 +17,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-$_methodAll = config('artisancloud.framework.router.methodAll');
-$_methodGet = config('artisancloud.framework.router.methodGet');
-$_methodPost = config('artisancloud.framework.router.methodPost');
-$_methodPut = config('artisancloud.framework.router.methodPut');
-$_methodDelete = config('artisancloud.framework.router.methodDelete');
+$_methodAll = config('artisancloud.framework.router.methodAll', ['options', 'get', 'post', 'put', 'delete']);
+$_methodGet = config('artisancloud.framework.router.methodGet', ['options', 'get']);
+$_methodPost = config('artisancloud.framework.router.methodPost', ['options', 'post']);
+$_methodPut = config('artisancloud.framework.router.methodPut', ['options', 'put']);
+$_methodDelete = config('artisancloud.framework.router.methodDelete', ['options', 'delete']);
 $_api_version = config('artisancloud.framework.api_version');
 $_namespaceAPI = 'ArtisanCloud\SaaSMonomer\Http\Controllers\API';
 
@@ -35,7 +35,7 @@ Route::group(
         'domain' => $_domain_tenant,
         'middleware' => ['checkHeader', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
-        
+
 });
 
 
@@ -47,6 +47,5 @@ Route::group(
         'middleware' => ['checkHeader', 'auth:api', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
 
-    Route::match($_methodPost, 'invitation/generate', 'InvitationCodeAPIController@apiBatchGenerateCode')->name('code.write.invitation.generate');
-    
+
 });
