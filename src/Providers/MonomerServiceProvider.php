@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace ArtisanCloud\SaaSMonomer\Providers;
 
+use ArtisanCloud\SaaSMonomer\Http\Middleware\CheckLandlord;
+
 use ArtisanCloud\SaaSMonomer\Services\TeamService\src\Providers\TeamServiceProvider;
 use ArtisanCloud\SaaSMonomer\Services\UserService\src\Providers\UserServiceProvider;
 use ArtisanCloud\SaaSMonomer\Console\Commands\SaasMonomerInstallCommand;
@@ -39,9 +41,9 @@ class MonomerServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // config framework router
+        $this->configRouter();
 
-        $this->loadRoutesFrom(__DIR__.'/../../routes/api.php');
-        
         if ($this->app->runningInConsole()) {
 
 //            $this->commands([
@@ -53,5 +55,11 @@ class MonomerServiceProvider extends ServiceProvider
             ], ['ArtisanCloud','SaaSMonomer', 'Landlord-Config']);
 
         }
+    }
+    public function configRouter()
+    {
+        
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/api.php');
+
     }
 }
