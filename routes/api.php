@@ -46,6 +46,5 @@ Route::group(
         'domain' => $_domain_tenant,
         'middleware' => ['checkHeader', 'auth:api', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
-
-
+        
 });
