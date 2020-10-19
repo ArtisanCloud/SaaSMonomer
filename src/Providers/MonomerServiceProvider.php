@@ -5,6 +5,8 @@ namespace ArtisanCloud\SaaSMonomer\Providers;
 
 use ArtisanCloud\SaaSMonomer\Http\Middleware\CheckLandlord;
 
+use ArtisanCloud\SaaSMonomer\Services\LandlordService\src\Providers\LandlordServiceProvider;
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Providers\TenantServiceProvider;
 use ArtisanCloud\SaaSMonomer\Services\TeamService\src\Providers\TeamServiceProvider;
 use ArtisanCloud\SaaSMonomer\Services\UserService\src\Providers\UserServiceProvider;
 use ArtisanCloud\SaaSMonomer\Console\Commands\SaasMonomerInstallCommand;
@@ -31,6 +33,8 @@ class MonomerServiceProvider extends ServiceProvider
 //        $this->app->register(
 //            TenantServiceProvider::class
 //        );
+        $this->app->register(LandlordServiceProvider::class);
+        $this->app->register(TenantServiceProvider::class);
         $this->app->register(TeamServiceProvider::class);
     }
 
