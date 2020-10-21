@@ -3,13 +3,17 @@ declare(strict_types=1);
 
 namespace ArtisanCloud\SaaSMonomer\Providers;
 
-use ArtisanCloud\SaaSMonomer\Http\Middleware\CheckLandlord;
-
 use ArtisanCloud\SaaSMonomer\Services\LandlordService\src\Providers\LandlordServiceProvider;
+use ArtisanCloud\SaaSMononer\Http\Middleware\{
+    CheckLandlord,
+    CheckUser
+};
+
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Providers\TenantServiceProvider;
 use ArtisanCloud\SaaSMonomer\Services\TeamService\src\Providers\TeamServiceProvider;
 use ArtisanCloud\SaaSMonomer\Services\UserService\src\Providers\UserServiceProvider;
 use ArtisanCloud\SaaSMonomer\Console\Commands\SaasMonomerInstallCommand;
+use Illuminate\Routing\Router;
 use Laravel\Passport\Passport;
 
 use Illuminate\Support\Facades\Artisan;
@@ -62,6 +66,11 @@ class MonomerServiceProvider extends ServiceProvider
     }
     public function configRouter()
     {
+
+        // alias middlewares
+        $router = resolve(Router::class);
+        $router->aliasMiddleware('checkLandlord', CheckLandlord::class);
+        $router->aliasMiddleware('checkUser', CheckUser::class);
         
         $this->loadRoutesFrom(__DIR__ . '/../../routes/api.php');
 

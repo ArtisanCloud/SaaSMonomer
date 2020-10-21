@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ArtisanCloud\SaaSMonomer\Services\LandlordService\src;
 
-use ArtisanCloud\SaasFramework\Services\ArtisanCloudService;
+use ArtisanCloud\SaaSFramework\Services\ArtisanCloudService;
 use ArtisanCloud\SaaSMonomer\Services\LandlordService\src\Contracts\LandlordServiceContract;
 use ArtisanCloud\SaaSMonomer\Services\LandlordService\src\Models\Landlord;
 
