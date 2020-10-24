@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace ArtisanCloud\SaaSMonomer\Providers;
 
+use App\Http\Kernel;
 use ArtisanCloud\SaaSMonomer\Services\LandlordService\src\Providers\LandlordServiceProvider;
-use ArtisanCloud\SaaSMononer\Http\Middleware\{
+use ArtisanCloud\SaaSMonomer\Http\Middleware\{
     CheckLandlord,
     CheckUser
 };
@@ -67,11 +68,16 @@ class MonomerServiceProvider extends ServiceProvider
     public function configRouter()
     {
 
+        // push middlewares
+        $kernel = resolve(Kernel::class);
+        $kernel->pushMiddleware(CheckLandlord::class);
+        $kernel->pushMiddleware(CheckUser::class);
+
         // alias middlewares
         $router = resolve(Router::class);
         $router->aliasMiddleware('checkLandlord', CheckLandlord::class);
         $router->aliasMiddleware('checkUser', CheckUser::class);
-        
+
         $this->loadRoutesFrom(__DIR__ . '/../../routes/api.php');
 
     }

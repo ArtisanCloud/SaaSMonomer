@@ -1,10 +1,10 @@
 <?php
 
-namespace ArtisanCloud\SaaSMononer\Http\Middleware;
+namespace ArtisanCloud\SaaSMonomer\Http\Middleware;
 
 use ArtisanCloud\SaaSFramework\Http\Controllers\API\APIResponse;
 use App\Services\UserService;
-use ArtisanCloud\SaaSFramework\Services\LandlordService\src\LandlordService;
+use ArtisanCloud\SaaSMonomer\Services\LandlordService\src\LandlordService;
 use Closure;
 
 class CheckLandlord
