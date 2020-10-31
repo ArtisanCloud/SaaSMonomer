@@ -2,8 +2,7 @@
 declare(strict_types=1);
 
 
-use ArtisanCloud\Commentable\Http\Controllers\API\CommentAPIController;
-use ArtisanCloud\ToDoable\Http\Controllers\API\ToDoAPIController;
+use ArtisanCloud\SaaSMonomer\Services\OrgService\Http\API\OrgAPIController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,5 +47,13 @@ Route::group(
         'domain' => $_domain_tenant,
         'middleware' => ['checkHeader', 'checkLandlord', 'auth:api', 'checkUser']
     ], function () use ($_methodGet, $_methodPost, $_methodPut, $_methodDelete) {
-        
+
+    Route::match($_methodPost, 'org/create', [OrgAPIController::class, 'apiCreate'])->name('org.write.create');
+    Route::match($_methodGet, 'org/read/item', [OrgAPIController::class, 'apiReadItem'])->name('org.read.item');
+    Route::match($_methodGet, 'org/read/list', [OrgAPIController::class, 'apiReadList'])->name('org.read.list');
+    Route::match($_methodPut, 'org/update', [OrgAPIController::class, 'apiUpdate'])->name('org.write.update');
+    Route::match($_methodDelete, 'org/delete', [OrgAPIController::class, 'apiDelete'])->name('org.write.Delete');
+
+
+
 });

@@ -27,7 +27,7 @@ class Tenant extends ArtisanCloudModel
 
         static::creating(function ($model) {
             $user = UserService::getAuthUser();
-            $model->created_by = $user ? $user->uuid : 'System Creator' ;
+            $model->created_by = $user ? $user->uuid : CREATED_BY_SYSTEM ;
 //            dd($model);
         });
     }
