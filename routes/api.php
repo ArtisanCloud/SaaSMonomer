@@ -52,7 +52,7 @@ Route::group(
     Route::match($_methodGet, 'org/read/item', [OrgAPIController::class, 'apiReadItem'])->name('org.read.item');
     Route::match($_methodGet, 'org/read/list', [OrgAPIController::class, 'apiReadList'])->name('org.read.list');
     Route::match($_methodPut, 'org/update', [OrgAPIController::class, 'apiUpdate'])->name('org.write.update');
-    Route::match($_methodDelete, 'org/delete', [OrgAPIController::class, 'apiDelete'])->name('org.write.Delete');
+    Route::match($_methodDelete, 'org/delete', [OrgAPIController::class, 'apiDelete'])->name('org.write.delete');
 
 
 
