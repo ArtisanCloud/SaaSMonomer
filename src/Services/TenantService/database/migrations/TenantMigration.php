@@ -17,7 +17,7 @@ class TenantMigration extends Migration
     {
         $this->schema = Schema::connection('tenant')->getConnection()->getSchemaBuilder();
 //        dd($this->schema);
-        
+
     }
 
     /**

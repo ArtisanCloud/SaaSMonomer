@@ -10,12 +10,13 @@ use ArtisanCloud\Commentable\Traits\Commentable;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class Tenant extends ArtisanCloudModel
 {
     use Commentable;
+    use SoftDeletes;
     
     protected $connection = 'tenant';
     const TABLE_NAME = '';
