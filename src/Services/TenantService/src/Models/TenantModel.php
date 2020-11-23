@@ -13,13 +13,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
-class Tenant extends TenantModel
+class TenantModel extends ArtisanCloudModel
 {
-    const TABLE_NAME = 'tenants';
+    use Commentable;
+    use SoftDeletes;
+    
+    protected $connection = 'tenant';
+    const TABLE_NAME = '';
     protected $table = self::TABLE_NAME;
-
-    const TYPE_USER = 1;
-    const TYPE_ORG = 2;
 
     protected static function boot()
     {

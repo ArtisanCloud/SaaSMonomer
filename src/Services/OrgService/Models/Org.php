@@ -6,9 +6,10 @@ namespace ArtisanCloud\SaaSMonomer\Services\OrgService\Models;
 use App\Models\User;
 use ArtisanCloud\SaaSFramework\Models\ArtisanCloudModel;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Org extends Tenant
+class Org extends TenantModel
 {
     const TABLE_NAME = 'orgs';
     protected $connection = 'pgsql';
