@@ -4,16 +4,17 @@ declare(strict_types=1);
 namespace ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models;
 
 use App\Services\UserService\UserService;
-use ArtisanCloud\SaaSFramework\Models\ArtisanCloudModel;
 
 use ArtisanCloud\Commentable\Traits\Commentable;
 
 use App\Models\User;
+use ArtisanCloud\SaaSFramework\Models\ArtisanCloudModel;
+
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
-class Tenant extends TenantModel
+class Tenant extends ArtisanCloudModel
 {
     const TABLE_NAME = 'tenants';
     protected $table = self::TABLE_NAME;
@@ -21,19 +22,25 @@ class Tenant extends TenantModel
     const TYPE_USER = 1;
     const TYPE_ORG = 2;
 
-    protected static function boot()
-    {
-        parent::boot();
 
-        static::creating(function ($model) {
-            $user = UserService::getAuthUser();
-            $model->created_by = $user ? $user->uuid : CREATED_BY_SYSTEM ;
-//            dd($model);
-        });
-    }
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'subdomain',
+        'tenantable_uuid',
+        'type',
+        'host',
+        'database',
+        'schema',
+        'account',
+        'password',
+        'uri',
+    ];
 
 
-    
     /**--------------------------------------------------------------- relation functions  -------------------------------------------------------------*/
     /**
      * Get user.

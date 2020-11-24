@@ -48,16 +48,21 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
 
     /**
      * Get database ID by $uuid.
+     * @param int $type
+     * @param string $name
      * @param string $uuid
+     *
      * @return null|array
      */
-    public function generateDatabaseAccessInfoBy(string $uuid): ?array
+    public function generateDatabaseAccessInfoBy(int $type,string $name,string $uuid): ?array
     {
         if (!Str::isUuid($uuid)) {
             return null;
         }
 
         $arrayStr = Str::of($uuid)->explode('-');
+
+        $arrayInfo['subdomain'] = "{$name}.".env('DOMAIN_TENANT', 'productman.com');
 
         $arrayInfo['account'] = $arrayStr[4];
         $arrayInfo['password'] = Str::random(64);
