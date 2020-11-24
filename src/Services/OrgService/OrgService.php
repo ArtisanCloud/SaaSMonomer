@@ -32,7 +32,6 @@ class OrgService extends ArtisanCloudService implements OrgServiceContract
     {
         $this->m_model = $this->m_model->firstOrNew(
             [
-//                'created_by' => $arrayData['user_uuid'],
                 'name' => $arrayData['name'],
             ],
             $arrayData

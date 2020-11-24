@@ -10,6 +10,7 @@ use ArtisanCloud\Commentable\Traits\Commentable;
 use App\Models\User;
 use ArtisanCloud\SaaSFramework\Models\ArtisanCloudModel;
 
+use ArtisanCloud\SaaSMonomer\Services\OrgService\Models\Org;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -30,8 +31,7 @@ class Tenant extends ArtisanCloudModel
      */
     protected $fillable = [
         'subdomain',
-        'tenantable_uuid',
-        'type',
+        'org_uuid',
         'host',
         'database',
         'schema',
@@ -41,15 +41,17 @@ class Tenant extends ArtisanCloudModel
     ];
 
 
+
     /**--------------------------------------------------------------- relation functions  -------------------------------------------------------------*/
+
     /**
-     * Get user.
+     * Get ort.
      *
      * @return BelongsTo
      *
      */
-    public function user()
+    public function org()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(Org::class, 'org_uuid');
     }
 }

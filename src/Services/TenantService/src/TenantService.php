@@ -25,7 +25,6 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
         $this->m_model = new Tenant();
     }
 
-
     /**
      * make a model
      *
@@ -35,16 +34,9 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public function makeBy(array $arrayData)
     {
-        $this->m_model = $this->m_model->firstOrNew(
-            [
-                'tenantable_uuid' => $arrayData['tenantable_uuid'],
-                'type' => $arrayData['type'],
-            ],
-            $arrayData
-        );
+        $this->m_model = $this->m_model->make($arrayData);
         return $this->m_model;
     }
-
 
     /**
      * Get database ID by $uuid.
