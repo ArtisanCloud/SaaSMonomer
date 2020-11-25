@@ -5,6 +5,7 @@ namespace ArtisanCloud\SaaSMonomer\Services\OrgService;
 use App\Models\User;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\Contracts\OrgServiceContract;
 use ArtisanCloud\SaaSFramework\Services\ArtisanCloudService;
+use ArtisanCloud\SaaSMonomer\Services\OrgService\Jobs\CreateOrg;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\Models\Org;
 
 /**
@@ -52,6 +53,22 @@ class OrgService extends ArtisanCloudService implements OrgServiceContract
         $orgs = $user->orgs()->get();
 //        dd($orgs);
         return $orgs;
+    }
+
+
+    /**
+     * Dispatch Job for create org by.
+     *
+     * @param User $user
+     * @param string $orgName
+     *
+     * @return \Illuminate\Foundation\Bus\PendingDispatch
+     */
+    public static function dispatchCreateOrgBy(User $user,$orgName)
+    {
+        return CreateOrg::dispatch($user, $orgName)
+            ->onConnection('redis-tenant')
+            ->onQueue('tenant-database');
     }
 
 }

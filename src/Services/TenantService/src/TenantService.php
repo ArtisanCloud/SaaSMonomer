@@ -4,9 +4,14 @@ declare(strict_types=1);
 namespace ArtisanCloud\SaaSMonomer\Services\TenantService\src;
 
 use ArtisanCloud\SaaSFramework\Services\ArtisanCloudService;
+use ArtisanCloud\SaaSMonomer\Services\OrgService\Models\Org;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Contracts\TenantServiceContract;
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\CreateTenant;
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\ProcessTenantDatabase;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
+use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -46,7 +51,7 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      *
      * @return null|array
      */
-    public function generateDatabaseAccessInfoBy(int $type,string $name,string $uuid): ?array
+    public function generateDatabaseAccessInfoBy(int $type, string $name, string $uuid): ?array
     {
         if (!Str::isUuid($uuid)) {
             return null;
@@ -54,7 +59,7 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
 
         $arrayStr = Str::of($uuid)->explode('-');
 
-        $arrayInfo['subdomain'] = "{$name}.".env('DOMAIN_TENANT', 'productman.com');
+        $arrayInfo['subdomain'] = "{$name}." . env('DOMAIN_TENANT', 'productman.com');
 
         $arrayInfo['account'] = $arrayStr[4];
         $arrayInfo['password'] = Str::random(64);
@@ -108,6 +113,35 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     {
         Artisan::call('migrate', array('database' => $databaseConnection, 'path' => $path));
         Artisan::call('db:seed', array('database' => $databaseConnection, 'path' => $path));
+    }
+
+
+    /**
+     * Dispatch Job for create tenant by.
+     *
+     * @param Org $org
+     *
+     * @return \Illuminate\Foundation\Bus\PendingDispatch
+     */
+    public static function dispatchCreateTenantBy(Org $org): PendingDispatch
+    {
+        CreateTenant::dispatch($org)
+            ->onConnection('redis-tenant')
+            ->onQueue('tenant-database');
+    }
+
+    /**
+     * Dispatch Job for create tenant by.
+     *
+     * @param Tenant $tenant
+     *
+     * @return \Illuminate\Foundation\Bus\PendingDispatch
+     */
+    public static function dispatchProcessTenantDatabase(Tenant $tenant): PendingDispatch
+    {
+        ProcessTenantDatabase::dispatch($tenant)
+            ->onConnection('redis-tenant')
+            ->onQueue('tenant-database');
     }
 
 
