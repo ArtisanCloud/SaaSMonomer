@@ -121,11 +121,11 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      *
      * @param Org $org
      *
-     * @return \Illuminate\Foundation\Bus\PendingDispatch
+     * @return null|\Illuminate\Foundation\Bus\PendingDispatch
      */
     public static function dispatchCreateTenantBy(Org $org): PendingDispatch
     {
-        CreateTenant::dispatch($org)
+        return CreateTenant::dispatch($org)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
     }
@@ -135,11 +135,11 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      *
      * @param Tenant $tenant
      *
-     * @return \Illuminate\Foundation\Bus\PendingDispatch
+     * @return null|\Illuminate\Foundation\Bus\PendingDispatch
      */
     public static function dispatchProcessTenantDatabase(Tenant $tenant): PendingDispatch
     {
-        ProcessTenantDatabase::dispatch($tenant)
+        return ProcessTenantDatabase::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
     }

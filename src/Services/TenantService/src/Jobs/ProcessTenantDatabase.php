@@ -3,7 +3,7 @@
 namespace ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs;
 
 use App\Services\UserService\UserService;
-use ArtisanCloud\SaaSFramework\Exceptions\BaseException;
+
 use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
@@ -14,6 +14,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+
+use Throwable;
 
 class ProcessTenantDatabase implements ShouldQueue
 {
@@ -37,11 +39,11 @@ class ProcessTenantDatabase implements ShouldQueue
         $this->tenantService->setModel($this->tenant);
 
 
-        $this->orgService = new OrgService();
+        $this->orgService = resolve(OrgService::class);
         $this->tenant->loadMissing('org');
         $org = $this->tenant->org;
 //        dd($org);
-        $this->$orgService->setModel($org);
+        $this->orgService->setModel($org);
 
     }
 
@@ -53,8 +55,8 @@ class ProcessTenantDatabase implements ShouldQueue
     public function handle()
     {
         //
-        Log::info("Process User:{$this->userService->getModel()->name} Tenant database:{$this->tenant->uuid}" );
-
+        Log::info("Process Org: Tenant database:{$this->tenant->uuid}");
+        return;
         try {
             if ($this->userService->isUserInit($this->user)) {
 
@@ -70,13 +72,11 @@ class ProcessTenantDatabase implements ShouldQueue
                 Log::warning('User is not init or user has create a tenant database');
             }
 
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
 //                dd($e);
-            throw new BaseException(
-                intval($e->getCode()),
-                $e->getMessage()
-            );
+            report($e);
         }
+
 
         return $user;
 
@@ -85,13 +85,13 @@ class ProcessTenantDatabase implements ShouldQueue
     /**
      * Handle a job failure.
      *
-     * @param  \Throwable  $exception
+     * @param Throwable $exception
      * @return void
      */
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error('process tenant database error: '.$exception->getMessage());
+        Log::error('process tenant database error: ' . $exception->getMessage());
     }
 
 }

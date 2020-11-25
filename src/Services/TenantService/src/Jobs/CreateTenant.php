@@ -14,11 +14,13 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
+use Throwable;
 class CreateTenant implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public Org $org;
+    protected TenantService $tenantService;
 
     /**
      * Create a new job instance.
@@ -31,6 +33,8 @@ class CreateTenant implements ShouldQueue
     {
         //
         $this->org = $org;
+
+        $this->tenantService = resolve(TenantService::class);
     }
 
     /**
@@ -44,12 +48,12 @@ class CreateTenant implements ShouldQueue
         $tenant = \DB::connection('pgsql')->transaction(function () {
             try {
                 // create a tenant for org
-                $arrayDBInfo = $tenantService->generateDatabaseAccessInfoBy(Tenant::TYPE_USER, $this->org->shorName, $this->org->uuid);
-                $arrayDBInfo['org_uuid'] = $org->uuid;
-                $tenant = $tenantService->createBy($arrayDBInfo);
+                $arrayDBInfo = $this->tenantService->generateDatabaseAccessInfoBy(Tenant::TYPE_USER, $this->org->short_name, $this->org->uuid);
+                $arrayDBInfo['org_uuid'] = $this->org->uuid;
+                $tenant = $this->tenantService->createBy($arrayDBInfo);
 
 
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
 //                dd($e);
                 report($e);
             }
@@ -60,14 +64,14 @@ class CreateTenant implements ShouldQueue
 
 
         if($tenant){
-            TenantService::dispatchProcessTenantDatabase();
+            TenantService::dispatchProcessTenantDatabase($tenant);
         }
     }
 
     /**
      * Handle a job failure.
      *
-     * @param  \Throwable  $exception
+     * @param  Throwable  $exception
      * @return void
      */
     public function failed(Throwable $exception)

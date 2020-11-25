@@ -64,7 +64,7 @@ class OrgService extends ArtisanCloudService implements OrgServiceContract
      * @param string $orgName
      * @param string $shortName
      *
-     * @return \Illuminate\Foundation\Bus\PendingDispatch
+     * @return null|\Illuminate\Foundation\Bus\PendingDispatch
      */
     public static function dispatchCreateOrgBy(User $user,$orgName,$shortName)
     {

@@ -18,6 +18,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
+use Throwable;
+
 class CreateOrg implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -64,7 +66,7 @@ class CreateOrg implements ShouldQueue
                 ]);
 //                dd($org);
 
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
 //                dd($e);
                 report($e);
             }
@@ -84,7 +86,7 @@ class CreateOrg implements ShouldQueue
     /**
      * Handle a job failure.
      *
-     * @param  \Throwable  $exception
+     * @param  Throwable  $exception
      * @return void
      */
     public function failed(Throwable $exception)
