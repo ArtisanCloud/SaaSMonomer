@@ -3,6 +3,7 @@
 namespace ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs;
 
 use ArtisanCloud\SaaSFramework\Exceptions\BaseException;
+use ArtisanCloud\SaaSMonomer\Services\OrgService\Models\Org;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
 use Illuminate\Bus\Queueable;
@@ -17,14 +18,19 @@ class CreateTenant implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public Org $org;
+
     /**
      * Create a new job instance.
      *
+     * @param Org $org
+     *
      * @return void
      */
-    public function __construct()
+    public function __construct(Org $org)
     {
         //
+        $this->org = $org;
     }
 
     /**
@@ -37,19 +43,15 @@ class CreateTenant implements ShouldQueue
         //
         $tenant = \DB::connection('pgsql')->transaction(function () {
             try {
-
                 // create a tenant for org
-                $arrayDBInfo = $tenantService->generateDatabaseAccessInfoBy(Tenant::TYPE_USER, $artisan->short_name, $org->uuid);
+                $arrayDBInfo = $tenantService->generateDatabaseAccessInfoBy(Tenant::TYPE_USER, $this->org->shorName, $this->org->uuid);
                 $arrayDBInfo['org_uuid'] = $org->uuid;
                 $tenant = $tenantService->createBy($arrayDBInfo);
 
 
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
 //                dd($e);
-                throw new BaseException(
-                    intval($e->getCode()),
-                    $e->getMessage()
-                );
+                report($e);
             }
 
             return $tenant;

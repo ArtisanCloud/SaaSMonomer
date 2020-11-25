@@ -24,6 +24,7 @@ class CreateOrg implements ShouldQueue
 
     public User $user;
     public string $orgName;
+    public string $shortName;
     protected OrgService $orgService;
 
     /**
@@ -34,11 +35,12 @@ class CreateOrg implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(User $user, string $orgName)
+    public function __construct(User $user, string $orgName, string $shortName)
     {
         //
         $this->user = $user;
         $this->orgName = $orgName;
+        $this->shortName = $shortName;
         $this->orgService = resolve(OrgService::class);
     }
 
@@ -58,6 +60,7 @@ class CreateOrg implements ShouldQueue
                 $org = $this->orgService->createBy([
                     'user_uuid' => $this->user->uuid,
                     'name' => $this->orgName,
+                    'short_name' => $this->shortName,
                 ]);
 //                dd($org);
 
@@ -71,7 +74,7 @@ class CreateOrg implements ShouldQueue
 
         if ($org) {
             // to create user org
-//            TenantService::dispatchCreateTenantBy($org);
+            TenantService::dispatchCreateTenantBy($org);
 
         }
 

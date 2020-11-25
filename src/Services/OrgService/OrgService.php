@@ -34,6 +34,7 @@ class OrgService extends ArtisanCloudService implements OrgServiceContract
         $this->m_model = $this->m_model->firstOrNew(
             [
                 'name' => $arrayData['name'],
+                'short_name' => $arrayData['short_name'],
             ],
             $arrayData
         );
@@ -61,12 +62,13 @@ class OrgService extends ArtisanCloudService implements OrgServiceContract
      *
      * @param User $user
      * @param string $orgName
+     * @param string $shortName
      *
      * @return \Illuminate\Foundation\Bus\PendingDispatch
      */
-    public static function dispatchCreateOrgBy(User $user,$orgName)
+    public static function dispatchCreateOrgBy(User $user,$orgName,$shortName)
     {
-        return CreateOrg::dispatch($user, $orgName)
+        return CreateOrg::dispatch($user, $orgName,$shortName)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
     }

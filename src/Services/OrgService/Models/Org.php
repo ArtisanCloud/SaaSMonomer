@@ -22,6 +22,7 @@ class Org extends TenantModel
      */
     protected $fillable = [
         'name',
+        'short_name',
         'user_uuid',
         'status',
         'payment_status',

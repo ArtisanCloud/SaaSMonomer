@@ -26,6 +26,7 @@ class OrgFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
+            'short_name' => $this->faker->randomLetter,
             'status' => Org::STATUS_NORMAL,
             'payment_status' => Org::PAYMENT_STATUS_PAID,
             'uuid' => Str::uuid(),
