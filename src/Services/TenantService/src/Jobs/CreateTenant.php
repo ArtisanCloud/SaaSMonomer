@@ -45,10 +45,12 @@ class CreateTenant implements ShouldQueue
     public function handle()
     {
         //
+        Log::info('Job handle create tenant for org: ' . $this->org->name);
+
         $tenant = \DB::connection('pgsql')->transaction(function () {
             try {
                 // create a tenant for org
-                $arrayDBInfo = $this->tenantService->generateDatabaseAccessInfoBy(Tenant::TYPE_USER, $this->org->short_name, $this->org->uuid);
+                $arrayDBInfo = $this->tenantService->generateDatabaseAccessInfoBy( $this->org->short_name, $this->org->uuid);
                 $arrayDBInfo['org_uuid'] = $this->org->uuid;
                 $tenant = $this->tenantService->createBy($arrayDBInfo);
 
@@ -61,8 +63,7 @@ class CreateTenant implements ShouldQueue
             return $tenant;
 
         });
-
-
+        
         if($tenant){
             TenantService::dispatchProcessTenantDatabase($tenant);
         }

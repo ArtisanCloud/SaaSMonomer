@@ -20,8 +20,10 @@ class Tenant extends ArtisanCloudModel
     const TABLE_NAME = 'tenants';
     protected $table = self::TABLE_NAME;
 
-    const TYPE_USER = 1;
-    const TYPE_ORG = 2;
+    const STATUS_INIT = 0;          // init
+    const STATUS_NORMAL = 1;        // normal
+    const STATUS_IN_PROCESS = 2;    // in process
+    const STATUS_INVALID = 4;       // soft deleted
 
 
     /**

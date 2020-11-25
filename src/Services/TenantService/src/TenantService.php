@@ -44,14 +44,57 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     }
 
     /**
+     * is database init ?
+     *
+     * @param Tenant $tenant
+     *
+     * @return bool
+     */
+    public function isDatabaseInit(Tenant $tenant = null)
+    {
+        $currentTenant = $tenant ?? $this->m_model;
+
+        return $currentTenant->status == Tenant::STATUS_INIT;
+    }
+
+    /**
+     * Is database processing ?
+     *
+     * @param Tenant $tenant
+     *
+     * @return bool
+     */
+    public function isDatabaseProcessing(Tenant $tenant = null)
+    {
+        $currentTenant = $tenant ?? $this->m_model;
+
+        return $currentTenant->status == Tenant::STATUS_IN_PROCESS;
+    }
+
+    /**
+     * Is database processed ?
+     *
+     * @param Tenant $tenant
+     *
+     * @return bool
+     */
+    public function isDatabaseProcessed(Tenant $tenant = null)
+    {
+        $currentTenant = $tenant ?? $this->m_model;
+
+        return $currentTenant->status == Tenant::STATUS_NORMAL;
+    }
+
+
+    /**
      * Get database ID by $uuid.
-     * @param int $type
+     *
      * @param string $name
      * @param string $uuid
      *
      * @return null|array
      */
-    public function generateDatabaseAccessInfoBy(int $type, string $name, string $uuid): ?array
+    public function generateDatabaseAccessInfoBy(string $name, string $uuid): ?array
     {
         if (!Str::isUuid($uuid)) {
             return null;
@@ -78,18 +121,31 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
         return $arrayInfo;
     }
 
+    /**
+     * Set tenant connection.
+     * @param Tenant $tenant
+     * @return bool
+     */
+    public function setConnection(Tenant $tenant): bool
+    {
+        $bResult = false;
+
+        return $bResult;
+    }
 
     /**
      * Creates a new database.
-     * @param array $arrayInfo
+     * @param Tenant $tenant
      * @return bool
      */
-    public function createDatabase(array $arrayInfo): bool
+    public function createDatabase(Tenant $tenant): bool
     {
+        $bResult = false;
 //        dd(DB::connection('tenant'));
 //        return DB::connection('tenant')->statement('CREATE DATABASE :database', ['database' => $databaseName]);
         //
-        $bResult = DB::connection('tenant')->statement("CREATE DATABASE {$arrayInfo['database']}");
+//        Log::info('create tenant info',$tenant->toArray());
+//        $bResult = DB::connection('tenant')->statement("CREATE DATABASE {$arrayInfo['database']}");
 
         return $bResult;
     }

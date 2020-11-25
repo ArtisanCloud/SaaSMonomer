@@ -23,7 +23,6 @@ class ProcessTenantDatabase implements ShouldQueue
 
     public Tenant $tenant;
     protected TenantService $tenantService;
-    protected OrgService $orgService;
 
     /**
      * Create a new job instance.
@@ -35,16 +34,10 @@ class ProcessTenantDatabase implements ShouldQueue
         //
         $this->tenant = $tenant;
 
-        $this->tenantService = new TenantService();
+        $this->tenantService = resolve(TenantService::class);
         $this->tenantService->setModel($this->tenant);
 
-
-        $this->orgService = resolve(OrgService::class);
         $this->tenant->loadMissing('org');
-        $org = $this->tenant->org;
-//        dd($org);
-        $this->orgService->setModel($org);
-
     }
 
     /**
@@ -55,17 +48,17 @@ class ProcessTenantDatabase implements ShouldQueue
     public function handle()
     {
         //
-        Log::info("Process Org: Tenant database:{$this->tenant->uuid}");
-        return;
+        Log::info("Job process Org:{$this->tenant->org->name} Tenant database:{$this->tenant->uuid}");
+
         try {
-            if ($this->userService->isUserInit($this->user)) {
+            if ($this->tenantService->isDatabaseInit()) {
 
                 // create user database
-                $bResult = $this->tenantService->createDatabase($arrayDBInfo);
+                $bResult = $this->tenantService->createDatabase($this->tenant);
                 if (!$bResult) {
-                    Log::alert("User: {$this->user->mobile}  failed to create database, please email amdin");
+                    Log::alert("Org Name: {$this->tenant->org->name}  failed to create database, please email amdin");
                 } else {
-                    Log::info("User: {$this->user->mobile}  succeed to create database, user will received a email to login");
+                    Log::info("Org Name: {$this->tenant->org->name}  succeed to create database, user will received a email to login");
                 }
 
             } else {
@@ -77,8 +70,7 @@ class ProcessTenantDatabase implements ShouldQueue
             report($e);
         }
 
-
-        return $user;
+        return $bResult;
 
     }
 
