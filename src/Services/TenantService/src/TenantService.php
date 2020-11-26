@@ -12,6 +12,7 @@ use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\SeedTenantDemo;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use Illuminate\Foundation\Bus\PendingDispatch;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -71,6 +72,20 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
         $currentTenant = $tenant ?? $this->m_model;
 
         return $currentTenant->status == Tenant::STATUS_CREATED_DATABASE;
+    }
+
+    /**
+     * Is database migrated ?
+     *
+     * @param Tenant $tenant
+     *
+     * @return bool
+     */
+    public function isDatabaseMigrated(Tenant $tenant = null)
+    {
+        $currentTenant = $tenant ?? $this->m_model;
+
+        return $currentTenant->status == Tenant::STATUS_MIGRATED_DATABASE;
     }
 
     /**
@@ -214,20 +229,35 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      * @param string $schemaName
      * @return bool
      */
-    public function createSchema($schemaName)
+    public function createSchema(string $schemaName)
     {
         return DB::connection()->statement('CREATE SCHEMA :schema', array('schema' => $schemaName));
     }
 
     /**
-     * Creates a new schema.
-     * @param string $schemaName
-     * @return bool
+     * Migrate tables.
+     *
+     * @param Tenant $tenant
+     * @param string $path
+     *
+     * @return int
      */
-    public function migrateTenant(string $databaseConnection, string $path = 'app/database/migrations/tenants')
+    public function migrateTenant(Tenant $tenant, string $path = 'app/database/migrations/tenants'): int
     {
-        Artisan::call('migrate', array('database' => $databaseConnection, 'path' => $path));
-        Artisan::call('db:seed', array('database' => $databaseConnection, 'path' => $path));
+        return Artisan::call('migrate', array('database' => $databaseConnection, 'path' => $path));
+    }
+
+    /**
+     * Seed demo.
+     *
+     * @param string $schemaName
+     * @param string $path
+     *
+     * @return int
+     */
+    public function seedDemo(Tenant $tenant, string $path = 'app/database/seeds/demo'): int
+    {
+        return Artisan::call('db:seed', array('database' => $databaseConnection, 'path' => $path));
     }
 
 

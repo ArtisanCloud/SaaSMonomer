@@ -22,9 +22,10 @@ class Tenant extends ArtisanCloudModel
 
     const STATUS_INIT = 0;                  // init
     const STATUS_NORMAL = 1;                // normal
-    const STATUS_CREATED_DATABASE = 2;     // in creating database
-    const STATUS_CREATED_ACCOUNT = 3;      // in creating account
-    const STATUS_SEEDED_DEMO = 5;          // in seeding demo
+    const STATUS_CREATED_DATABASE = 2;      // in creating database
+    const STATUS_CREATED_ACCOUNT = 3;       // in creating account
+    const STATUS_MIGRATED_DATABASE = 5;     // in creating account
+    const STATUS_SEEDED_DEMO = 6;           // in seeding demo
     const STATUS_INVALID = 4;               // soft deleted
 
 
@@ -44,7 +45,6 @@ class Tenant extends ArtisanCloudModel
         'password',
         'url',
     ];
-
 
 
     /**--------------------------------------------------------------- relation functions  -------------------------------------------------------------*/

@@ -6,7 +6,6 @@ use App\Services\UserService\UserService;
 
 use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
-use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -18,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 use Throwable;
 
-class ProcessTenantDatabase implements ShouldQueue
+class MigrateTenant implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -41,12 +40,8 @@ class ProcessTenantDatabase implements ShouldQueue
         $this->tenantService = resolve(TenantService::class);
         $this->tenantService->setModel($this->tenant);
 
-        // load tenant's org
-        $this->tenant->loadMissing('org');
-
         // setup current tenant connection
         $this->tenantService->setConnection($tenant);
-
     }
 
     /**
@@ -58,39 +53,18 @@ class ProcessTenantDatabase implements ShouldQueue
     {
         //
         $bResult = false;
-        Log::info("Job process Org:{$this->tenant->org->name} Tenant database:{$this->tenant->uuid}");
-
+        Log::info("\r\n Job seed Org:{$this->tenant->org->name} Tenant Demo:{$this->tenant->uuid}");
 
         try {
-            if ($this->tenantService->isDatabaseInit()) {
+            if ($this->tenantService->isDatabaseAccountCreated()) {
 
-                // create tenant database
-                $bResult = $this->tenantService->createDatabase($this->tenant);
+                // seed tenant demo
+                $bResult = $this->tenantService->seedDemo($this->tenant);
                 if ($bResult) {
                     Log::info("Org Name: {$this->tenant->org->name}  succeed to create database");
-
-                    // save tenant status
-                    $this->tenant->status = Tenant::STATUS_CREATED_DATABASE;
-                    $bResult = $this->tenant->save();
-
                 } else {
                     throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to create database, please email amdin"');
                 }
-
-
-                // create tenant database account
-                $bResult = $this->tenantService->createDatabaseAccount($this->tenant);
-                if ($bResult) {
-                    Log::info("Org Name: {$this->tenant->org->name}  succeed to create database account");
-
-                    // save tenant status
-                    $this->tenant->status = Tenant::STATUS_CREATED_ACCOUNT;
-                    $bResult = $this->tenant->save();
-
-                } else {
-                    throw new \Exception("Org Name: {$this->tenant->org->name}  failed to create database account, please email amdin");
-                }
-
 
             } else {
                 Log::warning('User is not init or user has create a tenant database');
@@ -102,8 +76,7 @@ class ProcessTenantDatabase implements ShouldQueue
             report($e);
         }
 
-        Log::info("Ready to seed tenant demo");
-        TenantService::dispatchSeedTenantDemo($this->tenant);
+        Log::info("user will received a email to login");
 
         return $bResult;
 

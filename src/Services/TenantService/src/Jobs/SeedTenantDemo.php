@@ -40,9 +40,6 @@ class SeedTenantDemo implements ShouldQueue
         $this->tenantService = resolve(TenantService::class);
         $this->tenantService->setModel($this->tenant);
 
-        // load tenant's org
-        $this->tenant->loadMissing('org');
-
         // setup current tenant connection
         $this->tenantService->setConnection($tenant);
     }
@@ -56,26 +53,17 @@ class SeedTenantDemo implements ShouldQueue
     {
         //
         $bResult = false;
-        Log::info("Job seed Org:{$this->tenant->org->name} Tenant Demo:{$this->tenant->uuid}");
+        Log::info("\r\n Job seed Org:{$this->tenant->org->name} Tenant Demo:{$this->tenant->uuid}");
 
         try {
             if ($this->tenantService->isDatabaseAccountCreated()) {
 
-                // create tenant database
-                $bResult = $this->tenantService->createDatabase($this->tenant);
+                // seed tenant demo
+                $bResult = $this->tenantService->seedDemo($this->tenant);
                 if ($bResult) {
                     Log::info("Org Name: {$this->tenant->org->name}  succeed to create database");
                 } else {
                     throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to create database, please email amdin"');
-                }
-
-                // create tenant database account
-                $bResult = $this->tenantService->createDatabaseAccount($this->tenant);
-                if ($bResult) {
-                    Log::info("Org Name: {$this->tenant->org->name}  succeed to create database account");
-
-                } else {
-                    throw new \Exception("Org Name: {$this->tenant->org->name}  failed to create database account, please email amdin");
                 }
 
             } else {
