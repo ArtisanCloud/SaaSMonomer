@@ -15,6 +15,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 use Throwable;
+
 class CreateTenant implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -47,13 +48,22 @@ class CreateTenant implements ShouldQueue
         //
         Log::info('Job handle create tenant for org: ' . $this->org->name);
 
+        $this->org->load('tenant');
+        if (!is_null($this->org->tenant)) {
+            Log::info(
+                'Org had already created tenant for org: ' . $this->org->name
+                . ', which tenant status is ' . $this->org->tenant->status
+            );
+            return false;
+        }
+
         $tenant = \DB::connection('pgsql')->transaction(function () {
+            $tenant = null;
             try {
                 // create a tenant for org
-                $arrayDBInfo = $this->tenantService->generateDatabaseAccessInfoBy( $this->org->short_name, $this->org->uuid);
+                $arrayDBInfo = $this->tenantService->generateDatabaseAccessInfoBy($this->org->short_name, $this->org->uuid);
                 $arrayDBInfo['org_uuid'] = $this->org->uuid;
                 $tenant = $this->tenantService->createBy($arrayDBInfo);
-
 
             } catch (Throwable $e) {
 //                dd($e);
@@ -63,22 +73,25 @@ class CreateTenant implements ShouldQueue
             return $tenant;
 
         });
-        
-        if($tenant){
+//        dd($tenant);
+
+        if ($tenant) {
             TenantService::dispatchProcessTenantDatabase($tenant);
         }
+
+        return true;
     }
 
     /**
      * Handle a job failure.
      *
-     * @param  Throwable  $exception
+     * @param Throwable $exception
      * @return void
      */
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error('create tenant error: '.$exception->getMessage());
+        Log::error('create tenant error: ' . $exception->getMessage());
     }
 
 }

@@ -8,6 +8,7 @@ use ArtisanCloud\SaaSFramework\Models\ArtisanCloudModel;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Org extends TenantModel
 {
@@ -36,15 +37,31 @@ class Org extends TenantModel
     protected $guarded = [];
 
     /**--------------------------------------------------------------- relation functions  -------------------------------------------------------------*/
-    
+
     /**
-     * Get the user's orgs.
+     * Get the org's tenant.
+     *
+     * @return HasOne
+     *
+     */
+    public function tenant()
+    {
+        return $this->hasOne(Tenant::class, 'org_uuid');
+    }
+
+    /**
+     * Get the org teams.
      *
      * @return BelongsToMany
      *
      */
-    public function users()
+    public function teams()
     {
         return $this->belongsToMany(User::class, 'r_user_to_org', 'org_uuid', 'user_uuid');
     }
+
+
+
+
+
 }

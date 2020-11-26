@@ -10,6 +10,7 @@ use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\CreateTenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\ProcessTenantDatabase;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use Illuminate\Foundation\Bus\PendingDispatch;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -21,7 +22,7 @@ use Illuminate\Support\Str;
 class TenantService extends ArtisanCloudService implements TenantServiceContract
 {
     //
-    protected $connection = null;
+    protected string $connectionName = 'tenant';
 
     //
     public function __construct()
@@ -58,32 +59,62 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     }
 
     /**
-     * Is database processing ?
+     * Is database created ?
      *
      * @param Tenant $tenant
      *
      * @return bool
      */
-    public function isDatabaseProcessing(Tenant $tenant = null)
+    public function isDatabaseCreated(Tenant $tenant = null)
     {
         $currentTenant = $tenant ?? $this->m_model;
 
-        return $currentTenant->status == Tenant::STATUS_IN_PROCESS;
+        return $currentTenant->status == Tenant::STATUS_CREATED_DATABASE;
     }
 
     /**
-     * Is database processed ?
+     * Is database account created ?
      *
      * @param Tenant $tenant
      *
      * @return bool
      */
-    public function isDatabaseProcessed(Tenant $tenant = null)
+    public function isDatabaseAccountCreated(Tenant $tenant = null)
+    {
+        $currentTenant = $tenant ?? $this->m_model;
+
+        return $currentTenant->status == Tenant::STATUS_CREATED_ACCOUNT;
+    }
+
+    /**
+     * Is database account seeded ?
+     *
+     * @param Tenant $tenant
+     *
+     * @return bool
+     */
+    public function isDatabaseDemoSeeded(Tenant $tenant = null)
+    {
+        $currentTenant = $tenant ?? $this->m_model;
+
+        return $currentTenant->status == Tenant::STATUS_SEEDED_DEMO;
+    }
+
+    /**
+     * Is tenant normal ?
+     *
+     * @param Tenant $tenant
+     *
+     * @return bool
+     */
+    public function isNormal(Tenant $tenant = null)
     {
         $currentTenant = $tenant ?? $this->m_model;
 
         return $currentTenant->status == Tenant::STATUS_NORMAL;
     }
+
+
 
 
     /**
@@ -104,14 +135,14 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
 
         $arrayInfo['subdomain'] = "{$name}." . env('DOMAIN_TENANT', 'productman.com');
 
-        $arrayInfo['account'] = $arrayStr[4];
+        $arrayInfo['account'] = 'u'.$arrayStr[4];
         $arrayInfo['password'] = Str::random(64);
         $arrayInfo['host'] = config('database.connections.tenant.host');
         $arrayInfo['port'] = config('database.connections.tenant.port');
         $arrayInfo['database'] = 'd' . $arrayStr[0] . Str::random(6);
         $arrayInfo['schema'] = config('database.connections.tenant.schema');
 
-        $arrayInfo['uri'] = "postgresql://"
+        $arrayInfo['url'] = "postgresql://"
             . $arrayInfo['account'] . ":" . $arrayInfo['password']
             . "@" . $arrayInfo['host'] . ":" . $arrayInfo['port']
             . "/" . $arrayInfo['database'];
@@ -123,15 +154,41 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
 
     /**
      * Set tenant connection.
+     *
      * @param Tenant $tenant
-     * @return bool
+     *
+     * @return void
      */
-    public function setConnection(Tenant $tenant): bool
+    public function setConnection(Tenant $tenant): void
     {
-        $bResult = false;
-
-        return $bResult;
+        Config::set("database.connections.{$this->connectionName}", [
+            'driver' => 'pgsql',
+            'url' => $tenant->url,
+            'host' => $tenant->host,
+            'port' => $tenant->port,
+            'database' => $tenant->database,
+            'username' => $tenant->account,
+            'password' => $tenant->password,
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'schema' => $tenant->schema,
+            'search_path' => "tenant,public",
+            'sslmode' => 'prefer',
+        ]);
     }
+
+    /**
+     * Get tenant connection name.
+     *
+     * @return string
+     */
+    public function getConnectionName(): string
+    {
+        return $this->connectionName;
+    }
+
+
 
     /**
      * Creates a new database.
@@ -142,13 +199,25 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     {
         $bResult = false;
 //        dd(DB::connection('tenant'));
-//        return DB::connection('tenant')->statement('CREATE DATABASE :database', ['database' => $databaseName]);
-        //
-//        Log::info('create tenant info',$tenant->toArray());
-//        $bResult = DB::connection('tenant')->statement("CREATE DATABASE {$arrayInfo['database']}");
+        $bResult = DB::connection($this->connectionName)->statement("CREATE DATABASE {$tenant->database};");
 
         return $bResult;
     }
+
+    /**
+     * Creates a new database.
+     * @param Tenant $tenant
+     * @return bool
+     */
+    public function createDatabaseAccount(Tenant $tenant): bool
+    {
+        $bResult = false;
+
+        $bResult = DB::connection($this->connectionName)->statement("CREATE USER {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEDB;");
+
+        return $bResult;
+    }
+
 
     /**
      * Creates a new schema.
@@ -196,6 +265,20 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     public static function dispatchProcessTenantDatabase(Tenant $tenant): PendingDispatch
     {
         return ProcessTenantDatabase::dispatch($tenant)
+            ->onConnection('redis-tenant')
+            ->onQueue('tenant-database');
+    }
+
+    /**
+     * Dispatch Job for seed demo by.
+     *
+     * @param Tenant $tenant
+     *
+     * @return null|\Illuminate\Foundation\Bus\PendingDispatch
+     */
+    public static function dispatchSeedTenantDemo(Tenant $tenant): PendingDispatch
+    {
+        return SeedTenantDemo::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
     }

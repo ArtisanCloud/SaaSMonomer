@@ -20,10 +20,12 @@ class Tenant extends ArtisanCloudModel
     const TABLE_NAME = 'tenants';
     protected $table = self::TABLE_NAME;
 
-    const STATUS_INIT = 0;          // init
-    const STATUS_NORMAL = 1;        // normal
-    const STATUS_IN_PROCESS = 2;    // in process
-    const STATUS_INVALID = 4;       // soft deleted
+    const STATUS_INIT = 0;                  // init
+    const STATUS_NORMAL = 1;                // normal
+    const STATUS_CREATED_DATABASE = 2;     // in creating database
+    const STATUS_CREATED_ACCOUNT = 3;      // in creating account
+    const STATUS_SEEDED_DEMO = 5;          // in seeding demo
+    const STATUS_INVALID = 4;               // soft deleted
 
 
     /**
@@ -35,11 +37,12 @@ class Tenant extends ArtisanCloudModel
         'subdomain',
         'org_uuid',
         'host',
+        'port',
         'database',
         'schema',
         'account',
         'password',
-        'uri',
+        'url',
     ];
 
 
