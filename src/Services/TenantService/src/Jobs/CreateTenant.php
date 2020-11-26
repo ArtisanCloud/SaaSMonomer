@@ -49,13 +49,13 @@ class CreateTenant implements ShouldQueue
         Log::info('Job handle create tenant for org: ' . $this->org->name);
 
         $this->org->load('tenant');
-        if (!is_null($this->org->tenant)) {
-            Log::info(
-                'Org had already created tenant for org: ' . $this->org->name
-                . ', which tenant status is ' . $this->org->tenant->status
-            );
-            return false;
-        }
+//        if (!is_null($this->org->tenant)) {
+//            Log::info(
+//                'Org had already created tenant for org: ' . $this->org->name
+//                . ', which tenant status is ' . $this->org->tenant->status
+//            );
+//            return false;
+//        }
 
         $tenant = \DB::connection()->transaction(function () {
             $tenant = null;

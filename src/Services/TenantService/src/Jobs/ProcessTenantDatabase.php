@@ -46,6 +46,7 @@ class ProcessTenantDatabase implements ShouldQueue
 
         // setup current tenant connection
         $this->tenantService->setConnection($tenant);
+
     }
 
     /**
@@ -59,46 +60,49 @@ class ProcessTenantDatabase implements ShouldQueue
         $bResult = false;
         Log::info("Job process Org:{$this->tenant->org->name} Tenant database:{$this->tenant->uuid}");
 
-        $tenant = \DB::connection(TenantModel::getConnectionNameStatic())->transaction(function () {
-            try {
-                if ($this->tenantService->isDatabaseInit()) {
 
-                    // create tenant database
-                    $bResult = $this->tenantService->createDatabase($this->tenant);
-                    if ($bResult) {
-                        Log::info("Org Name: {$this->tenant->org->name}  succeed to create database");
-                        $tenant->status = Tenant::STATUS_CREATED_DATABASE;
-                    } else {
-                        throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to create database, please email amdin"');
-                    }
+        try {
+            if ($this->tenantService->isDatabaseInit()) {
 
-
-                    // create tenant database account
-                    $bResult = $this->tenantService->createDatabaseAccount($this->tenant);
-                    if ($bResult) {
-                        Log::info("Org Name: {$this->tenant->org->name}  succeed to create database account");
-                        $tenant->status = Tenant::STATUS_CREATED_ACCOUNT;
-                    } else {
-                        throw new \Exception("Org Name: {$this->tenant->org->name}  failed to create database account, please email amdin");
-                    }
+                // create tenant database
+                $bResult = $this->tenantService->createDatabase($this->tenant);
+                if ($bResult) {
+                    Log::info("Org Name: {$this->tenant->org->name}  succeed to create database");
 
                     // save tenant status
-                    $bResult = $tenant->save();
+                    $this->tenant->status = Tenant::STATUS_CREATED_DATABASE;
+                    $bResult = $this->tenant->save();
 
                 } else {
-                    Log::warning('User is not init or user has create a tenant database');
+                    throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to create database, please email amdin"');
                 }
 
-            } catch (Throwable $e) {
-//                dd($e);
-                Log::alert($e->getMessage());
-                report($e);
-            }
-        });
-        if ($bResult) {
 
+                // create tenant database account
+                $bResult = $this->tenantService->createDatabaseAccount($this->tenant);
+                if ($bResult) {
+                    Log::info("Org Name: {$this->tenant->org->name}  succeed to create database account");
+
+                    // save tenant status
+                    $this->tenant->status = Tenant::STATUS_CREATED_ACCOUNT;
+                    $bResult = $this->tenant->save();
+
+                } else {
+                    throw new \Exception("Org Name: {$this->tenant->org->name}  failed to create database account, please email amdin");
+                }
+
+
+            } else {
+                Log::warning('User is not init or user has create a tenant database');
+            }
+
+        } catch (Throwable $e) {
+//                dd($e);
+            Log::alert($e->getMessage());
+            report($e);
         }
 
+        TenantService::dispatchSeedTenantDemo($this->tenant);
         Log::info("user will received a email to login");
 
         return $bResult;
