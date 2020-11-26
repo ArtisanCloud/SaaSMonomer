@@ -56,7 +56,7 @@ class CreateOrg implements ShouldQueue
         //
         Log::info('Job handle create org for user: ' . $this->user->mobile);
         
-        $org = \DB::connection('pgsql')->transaction(function () {
+        $org = \DB::connection()->transaction(function () {
             try {
                 // create org for user
                 $orgService =

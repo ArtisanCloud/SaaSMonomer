@@ -57,7 +57,7 @@ class CreateTenant implements ShouldQueue
             return false;
         }
 
-        $tenant = \DB::connection('pgsql')->transaction(function () {
+        $tenant = \DB::connection()->transaction(function () {
             $tenant = null;
             try {
                 // create a tenant for org

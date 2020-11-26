@@ -35,7 +35,7 @@ class OrgAPIController extends APIController
 
     public function apiCreate(RequestOrgCreate $request)
     {
-        $org = \DB::connection('pgsql')->transaction(function () use ($request) {
+        $org = \DB::connection()->transaction(function () use ($request) {
 
             try {
                 $arrayData = $request->all();

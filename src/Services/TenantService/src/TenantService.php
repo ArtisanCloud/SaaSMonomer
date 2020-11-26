@@ -9,6 +9,7 @@ use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Contracts\TenantServiceC
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\CreateTenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\ProcessTenantDatabase;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,6 @@ use Illuminate\Support\Str;
 class TenantService extends ArtisanCloudService implements TenantServiceContract
 {
     //
-    protected string $connectionName = 'tenant';
 
     //
     public function __construct()
@@ -161,7 +161,7 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public function setConnection(Tenant $tenant): void
     {
-        Config::set("database.connections.{$this->connectionName}", [
+        Config::set("database.connections.".Tenant::getConnectionNameStatic(), [
             'driver' => 'pgsql',
             'url' => $tenant->url,
             'host' => $tenant->host,
@@ -178,15 +178,8 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
         ]);
     }
 
-    /**
-     * Get tenant connection name.
-     *
-     * @return string
-     */
-    public function getConnectionName(): string
-    {
-        return $this->connectionName;
-    }
+
+
 
 
 
@@ -198,8 +191,9 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     public function createDatabase(Tenant $tenant): bool
     {
         $bResult = false;
-//        dd(DB::connection('tenant'));
-        $bResult = DB::connection($this->connectionName)->statement("CREATE DATABASE {$tenant->database};");
+//        dd(DB::connection(TenantModel::getConnectionNameStatic()));
+        $bResult = DB::connection(Tenant::getConnectionNameStatic())
+            ->statement("CREATE DATABASE {$tenant->database};");
 
         return $bResult;
     }
@@ -213,7 +207,8 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     {
         $bResult = false;
 
-        $bResult = DB::connection($this->connectionName)->statement("CREATE USER {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEDB;");
+        $bResult = DB::connection(Tenant::getConnectionNameStatic())
+            ->statement("CREATE USER {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEDB;");
 
         return $bResult;
     }

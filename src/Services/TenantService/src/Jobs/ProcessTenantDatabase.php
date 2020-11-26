@@ -6,6 +6,7 @@ use App\Services\UserService\UserService;
 
 use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -58,7 +59,7 @@ class ProcessTenantDatabase implements ShouldQueue
         $bResult = false;
         Log::info("Job process Org:{$this->tenant->org->name} Tenant database:{$this->tenant->uuid}");
 
-        $tenant = \DB::connection($this->tenantService->getConnection())->transaction(function () {
+        $tenant = \DB::connection(TenantModel::getConnectionNameStatic())->transaction(function () {
             try {
                 if ($this->tenantService->isDatabaseInit()) {
 
