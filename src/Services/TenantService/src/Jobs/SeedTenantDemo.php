@@ -40,8 +40,6 @@ class SeedTenantDemo implements ShouldQueue
         $this->tenantService = resolve(TenantService::class);
         $this->tenantService->setModel($this->tenant);
 
-        // setup current tenant connection
-        $this->tenantService->setConnection($tenant);
     }
 
     /**
@@ -51,6 +49,12 @@ class SeedTenantDemo implements ShouldQueue
      */
     public function handle()
     {
+        /**
+         * setup current tenant connection with current session
+         * cannot set connection in construction
+         */
+        $this->tenantService->setConnection($this->tenant);
+
         //
         $bResult = false;
         Log::info("\r\n Job seed Org:{$this->tenant->org->name} Tenant Demo:{$this->tenant->uuid}");
@@ -91,7 +95,7 @@ class SeedTenantDemo implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error('process tenant database error: ' . $exception->getMessage());
+        Log::error('seed tenant demo error: ' . $exception->getMessage());
     }
 
 }

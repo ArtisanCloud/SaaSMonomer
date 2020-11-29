@@ -6,6 +6,7 @@ use App\Services\UserService\UserService;
 
 use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -13,6 +14,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 use Throwable;
@@ -40,8 +43,9 @@ class MigrateTenant implements ShouldQueue
         $this->tenantService = resolve(TenantService::class);
         $this->tenantService->setModel($this->tenant);
 
-        // setup current tenant connection
-        $this->tenantService->setConnection($tenant);
+        // load tenant's org
+        $this->tenant->loadMissing('org');
+
     }
 
     /**
@@ -51,32 +55,50 @@ class MigrateTenant implements ShouldQueue
      */
     public function handle()
     {
+        /**
+         * setup current tenant connection with current session
+         * cannot set connection in construction
+         */
+        $this->tenantService->setConnection($this->tenant);
+
         //
         $bResult = false;
-        Log::info("\r\n Job seed Org:{$this->tenant->org->name} Tenant Demo:{$this->tenant->uuid}");
+        Log::info($this->tenant->org->name . ": Job migrate Tenant table:{$this->tenant->uuid}");
 
         try {
             if ($this->tenantService->isDatabaseAccountCreated()) {
 
                 // seed tenant demo
-                $bResult = $this->tenantService->seedDemo($this->tenant);
+                $bResult = $this->tenantService->migrateTenant($this->tenant);
                 if ($bResult) {
-                    Log::info("Org Name: {$this->tenant->org->name}  succeed to create database");
+                    Log::info($this->tenant->org->name . ": Job succeed to migrate database");
+
+                    // save tenant status
+                    $this->tenant->status = Tenant::STATUS_MIGRATED_DATABASE;
+                    $bResult = $this->tenant->save();
+
                 } else {
-                    throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to create database, please email amdin"');
+                    throw new \Exception($this->tenant->org->name . ": failed to migrate table, please email amdin");
                 }
 
             } else {
-                Log::warning('User is not init or user has create a tenant database');
+                Log::warning($this->tenant->org->name . ": Job User tenant account is not created");
             }
 
         } catch (Throwable $e) {
 //                dd($e);
-            Log::alert($e->getMessage());
+            Log::alert($this->tenant->org->name . ": Job " . $e->getMessage());
+            $bResult = false;
             report($e);
         }
 
-        Log::info("user will received a email to login");
+        if ($bResult) {
+
+            Log::info($this->tenant->org->name . ": Job Ready to dispatch seed tenant demo");
+//            TenantService::dispatchSeedTenantDemo($this->tenant);
+            Log::info($this->tenant->org->name . ": Job finish to dispatch seed tenant demo");
+        }
+
 
         return $bResult;
 
@@ -91,7 +113,7 @@ class MigrateTenant implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error('process tenant database error: ' . $exception->getMessage());
+        Log::error($this->tenant->org->name . ": Job migrate tenant database error: " . $exception->getMessage());
     }
 
 }

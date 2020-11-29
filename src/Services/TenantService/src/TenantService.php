@@ -7,6 +7,7 @@ use ArtisanCloud\SaaSFramework\Services\ArtisanCloudService;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\Models\Org;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Contracts\TenantServiceContract;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\CreateTenant;
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\MigrateTenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\ProcessTenantDatabase;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\SeedTenantDemo;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
@@ -153,7 +154,12 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
         $arrayInfo['password'] = Str::random(64);
         $arrayInfo['host'] = config('database.connections.tenant.host');
         $arrayInfo['port'] = config('database.connections.tenant.port');
-        $arrayInfo['database'] = Str::lower('d' . $arrayStr[0] . Str::random(6));
+        $arrayInfo['database'] = Str::lower(
+            'd'
+            . Str::substr($arrayStr[1], 0, 2)
+            . $arrayStr[0]
+            . Str::substr($arrayStr[2], 0, 2)
+        );
         $arrayInfo['schema'] = config('database.connections.tenant.schema');
 
         $arrayInfo['url'] = "postgresql://"
@@ -165,6 +171,33 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
 
         return $arrayInfo;
     }
+
+    /**
+     * Set tenant root connection.
+     *
+     * @param Tenant $tenant
+     *
+     * @return void
+     */
+    public function setRootConnection(Tenant $tenant): void
+    {
+        Config::set("database.connections." . TenantModel::getConnectionNameStatic(), [
+            'driver' => 'pgsql',
+            'url' => $tenant->url,
+            'host' => $tenant->host,
+            'port' => $tenant->port,
+            'database' => $tenant->database,
+            'username' => $tenant->account,
+            'password' => $tenant->password,
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'schema' => $tenant->schema,
+            'search_path' => "tenant,public",
+            'sslmode' => 'prefer',
+        ]);
+    }
+
 
     /**
      * Set tenant connection.
@@ -192,6 +225,36 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
         ]);
     }
 
+    /**
+     * Creates a new database role.
+     * @param Tenant $tenant
+     * @return bool
+     */
+    public function createDatabaseRole(Tenant $tenant): bool
+    {
+        $bResult = false;
+
+        $conection = DB::connection(TenantModel::getConnectionNameStatic());
+        $bResult = $conection->statement("CREATE ROLE {$tenant->account} WITH PASSWORD '{$tenant->password}' NOSUPERUSER NOCREATEDB NOCREATEROLE NOCREATEUSER;");
+
+        return $bResult;
+    }
+
+    /**
+     * Creates a new database.
+     * @param Tenant $tenant
+     * @return bool
+     */
+    public function createDatabaseAccount(Tenant $tenant): bool
+    {
+        $bResult = false;
+        dd(config('database.connections.'.TenantModel::getConnectionNameStatic()));
+        dd(DB::connection(TenantModel::getConnectionNameStatic()));
+        $conection = DB::connection(TenantModel::getConnectionNameStatic());
+        $bResult = $conection->statement("CREATE USER {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEDB;");
+
+        return $bResult;
+    }
 
     /**
      * Creates a new database.
@@ -209,30 +272,17 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     }
 
     /**
-     * Creates a new database.
-     * @param Tenant $tenant
-     * @return bool
-     */
-    public function createDatabaseAccount(Tenant $tenant): bool
-    {
-        $bResult = false;
-
-        $bResult = DB::connection(TenantModel::getConnectionNameStatic())
-            ->statement("CREATE USER {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEDB;");
-
-        return $bResult;
-    }
-
-
-    /**
      * Creates a new schema.
      * @param string $schemaName
      * @return bool
      */
     public function createSchema(string $schemaName)
     {
-        return DB::connection()->statement('CREATE SCHEMA :schema', array('schema' => $schemaName));
+        dd(DB::connection(TenantModel::getConnectionNameStatic())->getDatabaseName());
+        return DB::connection(TenantModel::getConnectionNameStatic())
+            ->statement("CREATE SCHEMA {$schemaName}");
     }
+
 
     /**
      * Migrate tables.
@@ -242,9 +292,12 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      *
      * @return int
      */
-    public function migrateTenant(Tenant $tenant, string $path = 'app/database/migrations/tenants'): int
+    public function migrateTenant(Tenant $tenant, string $path = 'database/migrations/tenants'): int
     {
-        return Artisan::call('migrate', array('database' => $databaseConnection, 'path' => $path));
+        dd(DB::connection(TenantModel::getConnectionNameStatic())->getDatabaseName());
+        $result = Artisan::call('migrate', array('--database' => TenantModel::getConnectionNameStatic(), '--path' => $path));
+        dd(Artisan::output());
+        return $result;
     }
 
     /**
@@ -257,7 +310,7 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public function seedDemo(Tenant $tenant, string $path = 'app/database/seeds/demo'): int
     {
-        return Artisan::call('db:seed', array('database' => $databaseConnection, 'path' => $path));
+        return Artisan::call('db:seed', array('--database' => TenantModel::getConnectionNameStatic(), '--path' => $path));
     }
 
 
@@ -285,6 +338,20 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     public static function dispatchProcessTenantDatabase(Tenant $tenant): PendingDispatch
     {
         return ProcessTenantDatabase::dispatch($tenant)
+            ->onConnection('redis-tenant')
+            ->onQueue('tenant-database');
+    }
+
+    /**
+     * Dispatch Job for migrate tenant table by.
+     *
+     * @param Tenant $tenant
+     *
+     * @return null|\Illuminate\Foundation\Bus\PendingDispatch
+     */
+    public static function dispatchMigrateTenant(Tenant $tenant): PendingDispatch
+    {
+        return MigrateTenant::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
     }

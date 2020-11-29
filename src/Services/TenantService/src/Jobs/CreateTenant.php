@@ -35,6 +35,8 @@ class CreateTenant implements ShouldQueue
         //
         $this->org = $org;
 
+        $this->org->loadMissing('creator');
+
         $this->tenantService = resolve(TenantService::class);
     }
 
@@ -46,12 +48,12 @@ class CreateTenant implements ShouldQueue
     public function handle()
     {
         //
-        Log::info('Job handle create tenant for org: ' . $this->org->name);
+        Log::info($this->org->creator->mobile . ': Job handle create tenant for org: ' . $this->org->name);
 
         $this->org->load('tenant');
 //        if (!is_null($this->org->tenant)) {
 //            Log::info(
-//                'Org had already created tenant for org: ' . $this->org->name
+//                $this->org->creator->mobile . ': Org had already created tenant for org: ' . $this->org->name
 //                . ', which tenant status is ' . $this->org->tenant->status
 //            );
 //            return false;
@@ -91,7 +93,7 @@ class CreateTenant implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error('create tenant error: ' . $exception->getMessage());
+        Log::error($this->org->creator->mobile . ': create tenant error: ' . $exception->getMessage());
     }
 
 }

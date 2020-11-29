@@ -3,6 +3,7 @@
 namespace ArtisanCloud\SaaSMonomer\Services\OrgService\Jobs;
 
 use App\Models\User;
+use App\Services\UserService\UserService;
 use ArtisanCloud\SaaSFramework\Exceptions\BaseException;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\CreateTenant;
@@ -54,14 +55,13 @@ class CreateOrg implements ShouldQueue
     public function handle()
     {
         //
-        Log::info('Job handle create org for user: ' . $this->user->mobile);
-        
+        Log::info($this->user->mobile.': Job handle create org for user: ');
+
         $org = \DB::connection()->transaction(function () {
             try {
                 // create org for user
-                $orgService =
+                UserService::setAuthUser($this->user);
                 $org = $this->orgService->createBy([
-                    'user_uuid' => $this->user->uuid,
                     'name' => $this->orgName,
                     'short_name' => $this->shortName,
                 ]);
@@ -77,7 +77,9 @@ class CreateOrg implements ShouldQueue
 
         if ($org) {
             // to create user org
+            Log::info($this->user->mobile.': Job ready to dispatch created tenant ');
             TenantService::dispatchCreateTenantBy($org);
+            Log::info($this->user->mobile.': Job finish to dispatch created tenant ');
 
         }
 
@@ -93,7 +95,7 @@ class CreateOrg implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error('create org error: '.$exception->getMessage());
+        Log::error($this->user->mobile.': create org error: '.$exception->getMessage());
     }
 
 }

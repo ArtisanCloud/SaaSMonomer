@@ -37,12 +37,12 @@ class TenantModel extends ArtisanCloudModel
     
     /**--------------------------------------------------------------- relation functions  -------------------------------------------------------------*/
     /**
-     * Get user.
+     * Get creator.
      *
      * @return BelongsTo
      *
      */
-    public function user()
+    public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }

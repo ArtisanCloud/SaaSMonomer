@@ -14,6 +14,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 use Throwable;
@@ -23,6 +24,7 @@ class ProcessTenantDatabase implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public Tenant $tenant;
+    public Tenant $rootTenant;
     protected TenantService $tenantService;
 
     /**
@@ -36,6 +38,7 @@ class ProcessTenantDatabase implements ShouldQueue
     {
         //init tenant
         $this->tenant = $tenant;
+        $this->rootTenant = $tenant;
 
         // load tenant service
         $this->tenantService = resolve(TenantService::class);
@@ -43,10 +46,6 @@ class ProcessTenantDatabase implements ShouldQueue
 
         // load tenant's org
         $this->tenant->loadMissing('org');
-
-        // setup current tenant connection
-        $this->tenantService->setConnection($tenant);
-
     }
 
     /**
@@ -56,54 +55,82 @@ class ProcessTenantDatabase implements ShouldQueue
      */
     public function handle()
     {
-        //
-        $bResult = false;
-        Log::info("Job process Org:{$this->tenant->org->name} Tenant database:{$this->tenant->uuid}");
+        // use root role to config current user role.
+        $this->rootTenant->account = env('DB_TENANT_ROOT_ROLE', 'postgres');
+        $this->rootTenant->password = env('DB_TENANT_ROOT_PASSWORD', 'postgres');
+//        dump($this->rootTenant);
 
+        /**
+         * setup current tenant connection with current session
+         * cannot set connection in construction
+         */
+        $this->tenantService->setConnection($this->rootTenant);
+//        dd(config('database.connections.'.TenantModel::getConnectionNameStatic()));
+
+
+        $bResult = false;
+        Log::info($this->tenant->org->name . ": Job process Tenant database:{$this->tenant->uuid}");
 
         try {
             if ($this->tenantService->isDatabaseInit()) {
 
-                // create tenant database
-                $bResult = $this->tenantService->createDatabase($this->tenant);
-                if ($bResult) {
-                    Log::info("Org Name: {$this->tenant->org->name}  succeed to create database");
-
-                    // save tenant status
-                    $this->tenant->status = Tenant::STATUS_CREATED_DATABASE;
-                    $bResult = $this->tenant->save();
-
-                } else {
-                    throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to create database, please email amdin"');
-                }
-
-
                 // create tenant database account
                 $bResult = $this->tenantService->createDatabaseAccount($this->tenant);
                 if ($bResult) {
-                    Log::info("Org Name: {$this->tenant->org->name}  succeed to create database account");
+                    Log::info($this->tenant->org->name . ": Job succeed to create database account");
 
                     // save tenant status
                     $this->tenant->status = Tenant::STATUS_CREATED_ACCOUNT;
                     $bResult = $this->tenant->save();
 
                 } else {
-                    throw new \Exception("Org Name: {$this->tenant->org->name}  failed to create database account, please email amdin");
+                    throw new \Exception($this->tenant->org->name . ": Job failed to create database account, please email amdin");
+                }
+
+
+                // create tenant database
+                $bResult = $this->tenantService->createDatabase($this->tenant);
+                if ($bResult) {
+                    Log::info($this->tenant->org->name . ": Job succeed to create database");
+
+                    // save tenant status
+                    $this->tenant->status = Tenant::STATUS_CREATED_DATABASE;
+                    $bResult = $this->tenant->save();
+
+                } else {
+                    throw new \Exception($this->tenant->org->name . ": Job failed to create database, please email amdin");
+                }
+
+
+                // create tenant schema
+                $bResult = $this->tenantService->createSchema($this->tenant->schema);
+                if ($bResult) {
+                    Log::info($this->tenant->org->name . ": Job succeed to create schema");
+
+                    // save tenant status
+                    $this->tenant->status = Tenant::STATUS_CREATED_SCHEMA;
+                    $bResult = $this->tenant->save();
+
+                } else {
+                    throw new \Exception($this->tenant->org->name . ": Job failed to create schema, please email amdin");
                 }
 
 
             } else {
-                Log::warning('User is not init or user has create a tenant database');
+                Log::warning($this->tenant->org->name . ": Job User is not init or user has create a tenant database");
             }
 
         } catch (Throwable $e) {
 //                dd($e);
             Log::alert($e->getMessage());
+            $bResult = false;
             report($e);
         }
 
-        Log::info("Ready to seed tenant demo");
-        TenantService::dispatchSeedTenantDemo($this->tenant);
+        if ($bResult) {
+            Log::info($this->tenant->org->name . ": Job Ready to migrate tenant");
+            TenantService::dispatchMigrateTenant($this->tenant);
+        }
 
         return $bResult;
 
@@ -118,7 +145,7 @@ class ProcessTenantDatabase implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error('process tenant database error: ' . $exception->getMessage());
+        Log::error($this->tenant->org->name . ": Job process tenant database error: " . $exception->getMessage());
     }
 
 }
