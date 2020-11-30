@@ -2,6 +2,7 @@
 
 namespace ArtisanCloud\SaaSMonomer\Services\TenantService\database\migrations;
 
+use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,7 +16,7 @@ class TenantMigration extends Migration
 
     function __construct()
     {
-        $this->schema = Schema::connection('tenant-servers')->getConnection()->getSchemaBuilder();
+        $this->schema = Schema::connection(TenantModel::getConnectionNameStatic())->getConnection()->getSchemaBuilder();
 //        dd($this->schema);
 
     }

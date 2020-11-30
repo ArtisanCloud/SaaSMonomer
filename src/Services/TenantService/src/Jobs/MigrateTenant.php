@@ -66,7 +66,7 @@ class MigrateTenant implements ShouldQueue
         Log::info($this->tenant->org->name . ": Job migrate Tenant table:{$this->tenant->uuid}");
 
         try {
-            if ($this->tenantService->isDatabaseAccountCreated()) {
+            if ($this->tenantService->isDatabaseSchemaCreated()) {
 
                 // seed tenant demo
                 $bResult = $this->tenantService->migrateTenant($this->tenant);
@@ -82,7 +82,7 @@ class MigrateTenant implements ShouldQueue
                 }
 
             } else {
-                Log::warning($this->tenant->org->name . ": Job User tenant account is not created");
+                Log::warning($this->tenant->org->name . ": Job User tenant schema already created");
             }
 
         } catch (Throwable $e) {

@@ -63,23 +63,9 @@ class ProcessTenantDatabase implements ShouldQueue
         Log::info($this->tenant->org->name . ": Job process Tenant database:{$this->tenant->uuid}");
 
         try {
-            if ($this->tenantService->isDatabaseInit()) {
+            // create tenant database
+            if ($this->tenantService->isDatabaseInit($this->tenant)) {
 
-                // create tenant database account
-                $bResult = $this->tenantService->createDatabaseAccount($this->tenant);
-                if ($bResult) {
-                    Log::info($this->tenant->org->name . ": Job succeed to create database account");
-
-                    // save tenant status
-                    $this->tenant->status = Tenant::STATUS_CREATED_ACCOUNT;
-                    $bResult = $this->tenant->save();
-
-                } else {
-                    throw new \Exception($this->tenant->org->name . ": Job failed to create database account, please email amdin");
-                }
-
-
-                // create tenant database
                 $bResult = $this->tenantService->createDatabase($this->tenant);
                 if ($bResult) {
                     Log::info($this->tenant->org->name . ": Job succeed to create database");
@@ -92,8 +78,32 @@ class ProcessTenantDatabase implements ShouldQueue
                     throw new \Exception($this->tenant->org->name . ": Job failed to create database, please email amdin");
                 }
 
+            } else {
+                Log::warning($this->tenant->org->name . ": Job User is not init or user has create a tenant database");
+            }
 
-                // create tenant schema
+            $bResult = false;
+            // create tenant database account
+            if ($this->tenantService->isDatabaseCreated($this->tenant)) {
+                $bResult = $this->tenantService->createDatabaseAccount($this->tenant);
+                if ($bResult) {
+                    Log::info($this->tenant->org->name . ": Job succeed to create database account");
+
+                    // save tenant status
+                    $this->tenant->status = Tenant::STATUS_CREATED_ACCOUNT;
+                    $bResult = $this->tenant->save();
+
+                } else {
+                    throw new \Exception($this->tenant->org->name . ": Job failed to create database account, please email amdin");
+                }
+            } else {
+                Log::warning($this->tenant->org->name . ": Job Tenant database is not created");
+            }
+
+            $bResult = false;
+            // create tenant schema
+            if ($this->tenantService->isDatabaseAccountCreated($this->tenant)) {
+
                 $bResult = $this->tenantService->createSchema($this->tenant->schema);
                 if ($bResult) {
                     Log::info($this->tenant->org->name . ": Job succeed to create schema");
@@ -105,11 +115,10 @@ class ProcessTenantDatabase implements ShouldQueue
                 } else {
                     throw new \Exception($this->tenant->org->name . ": Job failed to create schema, please email amdin");
                 }
-
-
             } else {
-                Log::warning($this->tenant->org->name . ": Job User is not init or user has create a tenant database");
+                Log::warning($this->tenant->org->name . ": Job Tenant account is not created");
             }
+
 
         } catch (Throwable $e) {
 //                dd($e);

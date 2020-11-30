@@ -76,20 +76,6 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     }
 
     /**
-     * Is database migrated ?
-     *
-     * @param Tenant $tenant
-     *
-     * @return bool
-     */
-    public function isDatabaseMigrated(Tenant $tenant = null)
-    {
-        $currentTenant = $tenant ?? $this->m_model;
-
-        return $currentTenant->status == Tenant::STATUS_MIGRATED_DATABASE;
-    }
-
-    /**
      * Is database account created ?
      *
      * @param Tenant $tenant
@@ -101,6 +87,34 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
         $currentTenant = $tenant ?? $this->m_model;
 
         return $currentTenant->status == Tenant::STATUS_CREATED_ACCOUNT;
+    }
+
+    /**
+     * Is database schema created ?
+     *
+     * @param Tenant $tenant
+     *
+     * @return bool
+     */
+    public function isDatabaseSchemaCreated(Tenant $tenant = null)
+    {
+        $currentTenant = $tenant ?? $this->m_model;
+
+        return $currentTenant->status == Tenant::STATUS_CREATED_SCHEMA;
+    }
+
+    /**
+     * Is database migrated ?
+     *
+     * @param Tenant $tenant
+     *
+     * @return bool
+     */
+    public function isDatabaseMigrated(Tenant $tenant = null)
+    {
+        $currentTenant = $tenant ?? $this->m_model;
+
+        return $currentTenant->status == Tenant::STATUS_MIGRATED_DATABASE;
     }
 
     /**
@@ -219,13 +233,13 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      * @param Tenant $tenant
      * @return bool
      */
-    public function createDatabaseAccount(Tenant $tenant): bool
+    public function createDatabase(Tenant $tenant): bool
     {
         $bResult = false;
-//        dump(123, config('database.connections.tenant-servers'));
-//        dd(321, DB::connection('tenant-servers'));
+//        dump(config('database.connections.tenant'));
+//        dd(DB::connection(TenantModel::getConnectionNameStatic()));
         $conection = DB::connection('tenant-servers');
-        $bResult = $conection->statement("CREATE USER {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEROLE NOCREATEDB;");
+        $bResult = $conection->statement("CREATE DATABASE {$tenant->database};");
 
         return $bResult;
     }
@@ -235,13 +249,14 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      * @param Tenant $tenant
      * @return bool
      */
-    public function createDatabase(Tenant $tenant): bool
+    public function createDatabaseAccount(Tenant $tenant): bool
     {
         $bResult = false;
-//        dump(config('database.connections.tenant'));
-//        dd(DB::connection(TenantModel::getConnectionNameStatic()));
+//        dump(123, config('database.connections.tenant-servers'));
+//        dd(321, DB::connection('tenant-servers'));
         $conection = DB::connection('tenant-servers');
-        $bResult = $conection->statement("CREATE DATABASE {$tenant->database};");
+        $bResult = $conection->statement("CREATE USER {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEROLE NOCREATEDB;");
+        $bResult = $conection->statement("GRANT ALL PRIVILEGES ON DATABASE \"{$tenant->database}\" to {$tenant->account};");
 
         return $bResult;
     }
@@ -274,10 +289,10 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public function migrateTenant(Tenant $tenant, string $path = 'database/migrations/tenants'): int
     {
-        dd(DB::connection(TenantModel::getConnectionNameStatic())->getDatabaseName());
+//        dd(DB::connection(TenantModel::getConnectionNameStatic())->getDatabaseName());
         $result = Artisan::call('migrate', array('--database' => TenantModel::getConnectionNameStatic(), '--path' => $path));
-        dd(Artisan::output());
-        return $result;
+//        dd(Artisan::output());
+        return 1;
     }
 
     /**

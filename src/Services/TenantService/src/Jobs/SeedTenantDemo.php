@@ -57,7 +57,7 @@ class SeedTenantDemo implements ShouldQueue
 
         //
         $bResult = false;
-        Log::info("\r\n Job seed Org:{$this->tenant->org->name} Tenant Demo:{$this->tenant->uuid}");
+        Log::info("Job seed Org:{$this->tenant->org->name} Tenant Demo:{$this->tenant->uuid}");
 
         try {
             if ($this->tenantService->isDatabaseAccountCreated()) {
