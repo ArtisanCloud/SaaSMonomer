@@ -172,32 +172,6 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
         return $arrayInfo;
     }
 
-    /**
-     * Set tenant root connection.
-     *
-     * @param Tenant $tenant
-     *
-     * @return void
-     */
-    public function setRootConnection(Tenant $tenant): void
-    {
-        Config::set("database.connections." . TenantModel::getConnectionNameStatic(), [
-            'driver' => 'pgsql',
-            'url' => $tenant->url,
-            'host' => $tenant->host,
-            'port' => $tenant->port,
-            'database' => $tenant->database,
-            'username' => $tenant->account,
-            'password' => $tenant->password,
-            'charset' => 'utf8',
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'schema' => $tenant->schema,
-            'search_path' => "tenant,public",
-            'sslmode' => 'prefer',
-        ]);
-    }
-
 
     /**
      * Set tenant connection.
@@ -235,7 +209,7 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
         $bResult = false;
 
         $conection = DB::connection(TenantModel::getConnectionNameStatic());
-        $bResult = $conection->statement("CREATE ROLE {$tenant->account} WITH PASSWORD '{$tenant->password}' NOSUPERUSER NOCREATEDB NOCREATEROLE NOCREATEUSER;");
+        $bResult = $conection->statement("CREATE ROLE {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEROLE NOCREATEUSER NOSUPERUSER NOCREATEDB;");
 
         return $bResult;
     }
@@ -248,10 +222,10 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     public function createDatabaseAccount(Tenant $tenant): bool
     {
         $bResult = false;
-        dd(config('database.connections.'.TenantModel::getConnectionNameStatic()));
-        dd(DB::connection(TenantModel::getConnectionNameStatic()));
-        $conection = DB::connection(TenantModel::getConnectionNameStatic());
-        $bResult = $conection->statement("CREATE USER {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEDB;");
+//        dump(123, config('database.connections.tenant-servers'));
+//        dd(321, DB::connection('tenant-servers'));
+        $conection = DB::connection('tenant-servers');
+        $bResult = $conection->statement("CREATE USER {$tenant->account} WITH PASSWORD '{$tenant->password}' NOCREATEROLE NOCREATEDB;");
 
         return $bResult;
     }
@@ -264,9 +238,10 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
     public function createDatabase(Tenant $tenant): bool
     {
         $bResult = false;
+//        dump(config('database.connections.tenant'));
 //        dd(DB::connection(TenantModel::getConnectionNameStatic()));
-        $bResult = DB::connection(TenantModel::getConnectionNameStatic())
-            ->statement("CREATE DATABASE {$tenant->database};");
+        $conection = DB::connection('tenant-servers');
+        $bResult = $conection->statement("CREATE DATABASE {$tenant->database};");
 
         return $bResult;
     }
@@ -278,9 +253,14 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public function createSchema(string $schemaName)
     {
-        dd(DB::connection(TenantModel::getConnectionNameStatic())->getDatabaseName());
-        return DB::connection(TenantModel::getConnectionNameStatic())
-            ->statement("CREATE SCHEMA {$schemaName}");
+        $bResult = false;
+//        dump(config('database.connections.tenant'));
+//        dd(DB::connection(TenantModel::getConnectionNameStatic()));
+        $conection = DB::connection(TenantModel::getConnectionNameStatic());
+        $bResult = $conection->statement("CREATE SCHEMA {$schemaName}");
+
+        return $bResult;
+
     }
 
 

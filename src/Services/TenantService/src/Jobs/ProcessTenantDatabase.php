@@ -24,7 +24,6 @@ class ProcessTenantDatabase implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public Tenant $tenant;
-    public Tenant $rootTenant;
     protected TenantService $tenantService;
 
     /**
@@ -38,7 +37,6 @@ class ProcessTenantDatabase implements ShouldQueue
     {
         //init tenant
         $this->tenant = $tenant;
-        $this->rootTenant = $tenant;
 
         // load tenant service
         $this->tenantService = resolve(TenantService::class);
@@ -55,18 +53,11 @@ class ProcessTenantDatabase implements ShouldQueue
      */
     public function handle()
     {
-        // use root role to config current user role.
-        $this->rootTenant->account = env('DB_TENANT_ROOT_ROLE', 'postgres');
-        $this->rootTenant->password = env('DB_TENANT_ROOT_PASSWORD', 'postgres');
-//        dump($this->rootTenant);
-
         /**
          * setup current tenant connection with current session
          * cannot set connection in construction
          */
-        $this->tenantService->setConnection($this->rootTenant);
-//        dd(config('database.connections.'.TenantModel::getConnectionNameStatic()));
-
+        $this->tenantService->setConnection($this->tenant);
 
         $bResult = false;
         Log::info($this->tenant->org->name . ": Job process Tenant database:{$this->tenant->uuid}");

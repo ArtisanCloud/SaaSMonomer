@@ -15,7 +15,7 @@ class TenantMigration extends Migration
 
     function __construct()
     {
-        $this->schema = Schema::connection('tenant')->getConnection()->getSchemaBuilder();
+        $this->schema = Schema::connection('tenant-servers')->getConnection()->getSchemaBuilder();
 //        dd($this->schema);
 
     }
