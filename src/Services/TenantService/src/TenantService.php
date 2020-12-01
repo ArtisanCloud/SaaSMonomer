@@ -303,8 +303,10 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      *
      * @return int
      */
-    public function seedDemo(Tenant $tenant, string $path = 'app/database/seeds/demo'): int
+    public function seedDemo(Tenant $tenant, string $path = 'database/seeds/demo'): int
     {
+        $artisan = resolve(Artisan::class);
+        $artisan->call(DemoSeeder::class);
         return Artisan::call('db:seed', array('--database' => TenantModel::getConnectionNameStatic(), '--path' => $path));
     }
 

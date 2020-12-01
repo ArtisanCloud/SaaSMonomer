@@ -40,6 +40,8 @@ class SeedTenantDemo implements ShouldQueue
         $this->tenantService = resolve(TenantService::class);
         $this->tenantService->setModel($this->tenant);
 
+        // load tenant's org
+        $this->tenant->loadMissing('org');
     }
 
     /**
@@ -60,18 +62,18 @@ class SeedTenantDemo implements ShouldQueue
         Log::info("Job seed Org:{$this->tenant->org->name} Tenant Demo:{$this->tenant->uuid}");
 
         try {
-            if ($this->tenantService->isDatabaseAccountCreated()) {
+            if ($this->tenantService->isDatabaseMigrated()) {
 
                 // seed tenant demo
                 $bResult = $this->tenantService->seedDemo($this->tenant);
                 if ($bResult) {
-                    Log::info("Org Name: {$this->tenant->org->name}  succeed to create database");
+                    Log::info("Org Name: {$this->tenant->org->name}  succeed to seed demo");
                 } else {
-                    throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to create database, please email amdin"');
+                    throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to seed demo, please email amdin"');
                 }
 
             } else {
-                Log::warning('User is not init or user has create a tenant database');
+                Log::warning($this->tenant->org->name . ": Job User tenant is not migrated");
             }
 
         } catch (Throwable $e) {

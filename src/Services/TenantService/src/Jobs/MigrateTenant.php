@@ -82,7 +82,7 @@ class MigrateTenant implements ShouldQueue
                 }
 
             } else {
-                Log::warning($this->tenant->org->name . ": Job User tenant schema already created");
+                Log::warning($this->tenant->org->name . ": Job User tenant schema not created");
             }
 
         } catch (Throwable $e) {
@@ -95,7 +95,7 @@ class MigrateTenant implements ShouldQueue
         if ($bResult) {
 
             Log::info($this->tenant->org->name . ": Job Ready to dispatch seed tenant demo");
-//            TenantService::dispatchSeedTenantDemo($this->tenant);
+            TenantService::dispatchSeedTenantDemo($this->tenant);
             Log::info($this->tenant->org->name . ": Job finish to dispatch seed tenant demo");
         }
 
