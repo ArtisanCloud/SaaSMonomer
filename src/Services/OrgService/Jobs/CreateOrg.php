@@ -55,7 +55,7 @@ class CreateOrg implements ShouldQueue
     public function handle()
     {
         //
-        Log::info($this->user->mobile.': Job handle create org for user: ');
+        Log::info($this->user->mobile . ': Job handle create org for user: ');
 
         $org = \DB::connection()->transaction(function () {
             try {
@@ -65,6 +65,9 @@ class CreateOrg implements ShouldQueue
                     'name' => $this->orgName,
                     'short_name' => $this->shortName,
                 ]);
+
+                $this->user->joinedOrgs()->save($org, ['role' => true]);
+
 //                dd($org);
 
             } catch (Throwable $e) {
@@ -77,9 +80,9 @@ class CreateOrg implements ShouldQueue
 
         if ($org) {
             // to create user org
-            Log::info($this->user->mobile.': Job ready to dispatch created tenant ');
+            Log::info($this->user->mobile . ': Job ready to dispatch created tenant ');
             TenantService::dispatchCreateTenantBy($org);
-            Log::info($this->user->mobile.': Job finish to dispatch created tenant ');
+            Log::info($this->user->mobile . ': Job finish to dispatch created tenant ');
 
         }
 
@@ -89,13 +92,13 @@ class CreateOrg implements ShouldQueue
     /**
      * Handle a job failure.
      *
-     * @param  Throwable  $exception
+     * @param Throwable $exception
      * @return void
      */
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error($this->user->mobile.': create org error: '.$exception->getMessage());
+        Log::error($this->user->mobile . ': create org error: ' . $exception->getMessage());
     }
 
 }

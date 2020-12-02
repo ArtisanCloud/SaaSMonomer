@@ -54,4 +54,20 @@ class OrgServiceProvider extends ServiceProvider
             }
 
     }
+
+    protected function publishConfig()
+    {
+        $this->publishes([
+            __DIR__ . '/../../config/monomer.php' => "/../" . config_path('artisancloud/monomer.php'),
+        ], ['ArtisanCloud','SaaSMonomer', 'Landlord-Config']);
+    }
+
+    protected function publishCommand()
+    {
+        $this->commands([
+            Init::class,
+            Migrate::class,
+            SeedDemo::class
+        ]);
+    }
 }

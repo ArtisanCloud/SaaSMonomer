@@ -9,10 +9,7 @@ use ArtisanCloud\SaaSMonomer\Console\Commands\Tenant\Migrate;
 use ArtisanCloud\SaaSMonomer\Console\Commands\Tenant\SeedDemo;
 use ArtisanCloud\SaaSMonomer\Services\LandlordService\src\Providers\LandlordServiceProvider;
 
-use ArtisanCloud\SaaSMonomer\Http\Middleware\{
-    CheckLandlord,
-    CheckUser
-};
+use ArtisanCloud\SaaSMonomer\Http\Middleware\{CheckLandlord, CheckTenant, CheckUser};
 
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Providers\TenantServiceProvider;
 use ArtisanCloud\SaaSMonomer\Services\TeamService\src\Providers\TeamServiceProvider;
@@ -76,6 +73,7 @@ class MonomerServiceProvider extends ServiceProvider
         $router = resolve(Router::class);
         $router->aliasMiddleware('checkLandlord', CheckLandlord::class);
         $router->aliasMiddleware('checkUser', CheckUser::class);
+        $router->aliasMiddleware('checkTenant', CheckTenant::class);
 
         $this->loadRoutesFrom(__DIR__ . '/../../routes/api.php');
 

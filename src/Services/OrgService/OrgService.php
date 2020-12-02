@@ -66,11 +66,34 @@ class OrgService extends ArtisanCloudService implements OrgServiceContract
      *
      * @return null|\Illuminate\Foundation\Bus\PendingDispatch
      */
-    public static function dispatchCreateOrgBy(User $user,$orgName,$shortName)
+    public static function dispatchCreateOrgBy(User $user, $orgName, $shortName)
     {
-        return CreateOrg::dispatch($user, $orgName,$shortName)
+        return CreateOrg::dispatch($user, $orgName, $shortName)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
+    }
+
+
+    /**
+     * set current session org
+     *
+     * @param Org $org
+     *
+     */
+
+    public static function setSessionOrg(Org $org)
+    {
+        session(['org' => $org]);
+    }
+
+    /**
+     * get current session org
+     *
+     * @return Org
+     */
+    public static function getSessionOrg(): ?Org
+    {
+        return session('org');
     }
 
 }
