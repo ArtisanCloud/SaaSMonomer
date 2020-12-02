@@ -66,7 +66,7 @@ class CreateOrg implements ShouldQueue
                     'short_name' => $this->shortName,
                 ]);
 
-                $this->user->joinedOrgs()->save($org, ['role' => true]);
+//                $this->user->joinedOrgs()->save($org, ['role' => true]);
 
 //                dd($org);
 
