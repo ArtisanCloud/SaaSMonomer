@@ -84,7 +84,7 @@ class SeedDemo extends Command
         $para = compact('tenant');
         $bResult = $this->call(\DemoSeeder::class, $para);
 
-        return $bResult;
+        return 1;
     }
 
 

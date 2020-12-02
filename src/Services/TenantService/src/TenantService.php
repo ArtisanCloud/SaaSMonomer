@@ -305,9 +305,8 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public function seedDemo(Tenant $tenant, string $path = 'database/seeds/demo'): int
     {
-        $artisan = resolve(Artisan::class);
-        $artisan->call(DemoSeeder::class);
-        return Artisan::call('db:seed', array('--database' => TenantModel::getConnectionNameStatic(), '--path' => $path));
+        $result = Artisan::call('tenant:seed ' . $tenant->uuid);
+        return $result;
     }
 
 
