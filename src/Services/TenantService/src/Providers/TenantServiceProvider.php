@@ -25,6 +25,8 @@ class TenantServiceProvider extends ServiceProvider
             TenantServiceContract::class,
             TenantService::class
         );
+
+        include_once(__DIR__.'/../../config/constant.php');
     }
 
     /**
@@ -34,22 +36,35 @@ class TenantServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
+        $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', TENANT_LANG);
+
         if ($this->app->runningInConsole()) {
             // publish config file
-            $this->publishes([
-                __DIR__ . '/../../config/tenant.php' => "/../" . config_path('artisancloud/tenant.php'),
-            ], ['ArtisanCloud', 'SaaSMonomer', 'Tenant-Config']);
-
-            // register artisan command
-            if (!class_exists('CreateTenantTable')) {
-                $this->publishes([
-                    __DIR__ . '/../../database/migrations/create_tenants_table.php' => database_path('migrations/0_0_0_0_create_tenants_table.php'),
-                    __DIR__ . '/../../database/migrations/create_r_artisan_to_team_table.php' => database_path('migrations/0_0_0_0_create_r_artisan_to_team_table.php'),
-                    __DIR__ . '/../../database/migrations/create_r_team_to_company_table.php' => database_path('migrations/0_0_0_0_create_r_team_to_company_table.php'),
-                    // you can add any number of migrations here
-                ], ['ArtisanCloud', 'SaaSMonomer', 'Tenant-Migration']);
-            }
+            $this->publishConfig();
+            $this->publishMigration();
         }
 
     }
+
+    public function publishConfig()
+    {
+        $this->publishes([
+            __DIR__ . '/../../config/tenant.php' => "/../" . config_path('artisancloud/tenant.php'),
+        ], ['ArtisanCloud', 'SaaSMonomer', 'Tenant-Config']);
+    }
+
+    public function publishMigration()
+    {
+        // register artisan command
+        if (!class_exists('CreateTenantTable')) {
+            $this->publishes([
+                __DIR__ . '/../../database/migrations/create_tenants_table.php' => database_path('migrations/0_0_0_0_create_tenants_table.php'),
+                __DIR__ . '/../../database/migrations/create_r_artisan_to_team_table.php' => database_path('migrations/0_0_0_0_create_r_artisan_to_team_table.php'),
+                __DIR__ . '/../../database/migrations/create_r_team_to_company_table.php' => database_path('migrations/0_0_0_0_create_r_team_to_company_table.php'),
+                // you can add any number of migrations here
+            ], ['ArtisanCloud', 'SaaSMonomer', 'Tenant-Migration']);
+        }
+    }
+
 }

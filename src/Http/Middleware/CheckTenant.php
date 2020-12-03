@@ -39,15 +39,17 @@ class CheckTenant
             $tenant = $org->tenant;
 //            dd($tenant);
             if(is_null($tenant)){
+                
+                $this->apiResponse->setLocaleNamespace(TENANT_LANG);
                 $this->apiResponse->setCode(API_ERR_CODE_TENANT_NOT_EXIST);
             }else{
-                $this->tenantService->setConnection($this->tenant);
+                $this->tenantService->setConnection($tenant);
             }
         }
 
         if (!$this->apiResponse->isNoError()) {
             // we can log here and check where access our server with invalid request
-            return $apiResponse->toJson();
+            return $this->apiResponse->toJson();
         }
 //        dd($org);
 
@@ -72,13 +74,16 @@ class CheckTenant
             return $sessionOrg;
         }
 
-        // get default org for current session
-        $headerOrg = OrgService::GetBy([
-            'uuid' => $headerOrgUuid,
-        ]);
-
+        $headerOrg = null;
         // check header org exists or not
+        if($headerOrgUuid){
+            $headerOrg = OrgService::GetBy([
+                'uuid' => $headerOrgUuid,
+            ]);
+        }
+
         if (is_null($headerOrg)) {
+            // get default org for current session
             $user = UserService::getAuthUser();
             $defautlOrg = $user->myOrgs()->first();
 
@@ -90,7 +95,7 @@ class CheckTenant
         // set new org into session
         if($org){
             /** later replace the session with cache */
-            OrgService::setSessionOrg($defautlOrg);
+            OrgService::setSessionOrg($org);
         }
 
         return $org;
