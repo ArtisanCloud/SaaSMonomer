@@ -2,6 +2,7 @@
 
 namespace ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs;
 
+use App\Models\User;
 use App\Services\UserService\UserService;
 
 use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
@@ -66,11 +67,15 @@ class SeedTenantDemo implements ShouldQueue
 
                 // seed tenant demo
                 $bResult = $this->tenantService->seedDemo($this->tenant);
-                if ($bResult) {
-                    Log::info("Org Name: {$this->tenant->org->name}  succeed to seed demo");
-                } else {
+                if (!$bResult) {
                     throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to seed demo, please email amdin"');
                 }
+                Log::info("Org Name: {$this->tenant->org->name}  succeed to seed demo");
+
+                // update user status
+                $user = $this->tenant->org->creator;
+                $user->status = User::STATUS_NORMAL;
+                $user->save();
 
             } else {
                 Log::warning($this->tenant->org->name . ": Job User tenant is not migrated");
