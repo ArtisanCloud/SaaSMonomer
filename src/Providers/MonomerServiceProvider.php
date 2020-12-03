@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ArtisanCloud\SaaSMonomer\Providers;
 
 use App\Http\Kernel;
+use ArtisanCloud\SaaSMonomer\Console\Commands\Tenant\CreateOrg;
 use ArtisanCloud\SaaSMonomer\Console\Commands\Tenant\Init;
 use ArtisanCloud\SaaSMonomer\Console\Commands\Tenant\Migrate;
 use ArtisanCloud\SaaSMonomer\Console\Commands\Tenant\SeedDemo;
@@ -91,7 +92,8 @@ class MonomerServiceProvider extends ServiceProvider
         $this->commands([
             Init::class,
             Migrate::class,
-            SeedDemo::class
+            SeedDemo::class,
+            CreateOrg::class,
         ]);
     }
 }

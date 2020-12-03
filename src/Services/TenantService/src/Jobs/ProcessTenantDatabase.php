@@ -128,7 +128,7 @@ class ProcessTenantDatabase implements ShouldQueue
         }
 
         if ($bResult) {
-            Log::info($this->tenant->org->name . ": Job Ready to migrate tenant");
+            
             TenantService::dispatchMigrateTenant($this->tenant);
         }
 

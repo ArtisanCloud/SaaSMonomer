@@ -5,6 +5,7 @@ namespace ArtisanCloud\SaaSMonomer\Services\OrgService\Jobs;
 use App\Models\User;
 use App\Services\UserService\UserService;
 use ArtisanCloud\SaaSFramework\Exceptions\BaseException;
+use ArtisanCloud\SaaSMonomer\Services\OrgService\Models\Org;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\CreateTenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\ProcessTenantDatabase;
@@ -28,6 +29,7 @@ class CreateOrg implements ShouldQueue
     public User $user;
     public string $orgName;
     public string $shortName;
+    public bool $isStandalone;
     protected OrgService $orgService;
 
     /**
@@ -38,12 +40,17 @@ class CreateOrg implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(User $user, string $orgName, string $shortName)
+    public function __construct(
+        User $user,
+        string $orgName,
+        string $shortName,
+        bool $isStandalone = false)
     {
         //
         $this->user = $user;
         $this->orgName = $orgName;
         $this->shortName = $shortName;
+        $this->isStandalone = $isStandalone;
         $this->orgService = resolve(OrgService::class);
     }
 
@@ -55,18 +62,19 @@ class CreateOrg implements ShouldQueue
     public function handle()
     {
         //
-        Log::info($this->user->mobile . ': Job handle create org for user: ');
+        Log::info($this->user->mobile . ': Job handle create org for user');
 
         $org = \DB::connection()->transaction(function () {
             try {
                 // create org for user
                 UserService::setAuthUser($this->user);
+//                dd($this->user);
                 $org = $this->orgService->createBy([
                     'name' => $this->orgName,
                     'short_name' => $this->shortName,
                 ]);
 
-//                $this->user->joinedOrgs()->save($org, ['role' => true]);
+                $this->user->joinedOrgs()->save($org, ['role' => Org::ROLE_CREATOR]);
 
 //                dd($org);
 
@@ -78,13 +86,12 @@ class CreateOrg implements ShouldQueue
 
         });
 
-        if ($org) {
+        if (!$this->isStandalone && $org) {
             // to create user org
-            Log::info($this->user->mobile . ': Job ready to dispatch created tenant ');
             TenantService::dispatchCreateTenantBy($org);
-            Log::info($this->user->mobile . ': Job finish to dispatch created tenant ');
-
         }
+
+        Log::info($org->name . ' finish create org'.$org->uuid);
 
 
     }

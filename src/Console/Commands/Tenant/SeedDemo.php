@@ -66,7 +66,7 @@ class SeedDemo extends Command
             $message = 'tenant is not valid';
             $this->error($message);
             Log::error($message);
-            return false;
+            return -1;
         }
 
 
@@ -75,7 +75,7 @@ class SeedDemo extends Command
             $message = 'tenant status is not migrated';
             $this->error($message);
             Log::error($message);
-            return false;
+            return -1;
         }
 
         $this->info($tenant->database);

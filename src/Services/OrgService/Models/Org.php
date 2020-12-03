@@ -10,11 +10,13 @@ use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Org extends TenantModel
+class Org extends ArtisanCloudModel
 {
     const TABLE_NAME = 'orgs';
-    protected $connection = 'pgsql';
     protected $table = self::TABLE_NAME;
+
+    const ROLE_CREATOR  = 0;
+    const ROLE_MEMBER  = 1;
 
     /**
      * The attributes that are mass assignable.

@@ -32,11 +32,12 @@ class CheckTenant
     public function handle($request, Closure $next)
     {
         $org = $this->loadSessionOrg($request);
-
+//        dd($org);
         if (is_null($org)) {
             $this->apiResponse->setCode(API_ERR_CODE_ORG_NOT_EXIST);
         }else{
             $tenant = $org->tenant;
+//            dd($tenant);
             if(is_null($tenant)){
                 $this->apiResponse->setCode(API_ERR_CODE_TENANT_NOT_EXIST);
             }else{
@@ -49,6 +50,7 @@ class CheckTenant
             return $apiResponse->toJson();
         }
 //        dd($org);
+
         return $next($request);
     }
 

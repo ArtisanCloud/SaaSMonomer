@@ -3,31 +3,35 @@ declare(strict_types=1);
 
 namespace ArtisanCloud\SaaSMonomer\Console\Commands\Tenant;
 
-use App\Models\User;
 use App\Services\UserService\UserService;
-use ArtisanCloud\SaaSPolymer\Events\UserRegistered;
+use ArtisanCloud\SaaSMonomer\Services\OrgService\Models\Org;
+use ArtisanCloud\SaaSMonomer\Services\OrgService\src\Models\Tenant;
+use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
+
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 
-class Init extends Command
+class CreateOrg extends Command
 {
+
+    protected Org $org;
+    protected OrgService $orgService;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'tenant:init {user} {orgName} {shortName}';
+    protected $signature = 'org:create {userUuid} {orgName} {orgShortName}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'tenant:init';
+    protected $description = 'org:create';
 
 
     /**
@@ -39,6 +43,8 @@ class Init extends Command
     {
         parent::__construct();
 
+        $this->orgService = resolve(OrgService::class);
+
     }
 
     /**
@@ -48,52 +54,41 @@ class Init extends Command
      */
     public function handle(): int
     {
-        $args = $this->arguments();
 //        dd($this->arguments());
 //        dd($this->options());
 
-
-        // input a valid uuid
-        if (!Str::isUUID($args['user'])) {
-            $this->error('please enter user\'s uuid');
-            return -1;
-        }
-
-        // get user
         $user = UserService::GetBy([
-            'uuid' => $args['user']
+            'uuid' => $this->argument('userUuid'),
         ]);
-        $userService = new UserService();
 
-        if (is_null($user) || !$userService->isUserInit($user)
-        ) {
-            $this->error('please input a init user');
+        // check if $user is valid
+        if (is_null($user)) {
+            $message = 'user is not valid';
+            $this->error($message);
+            Log::error($message);
             return -1;
         }
 
-        $orgName = $args['orgName'];
+        $orgName = $this->argument('orgName');
         if (!$orgName) {
             $message = 'org name  is required';
             $this->error($message);
+            Log::error($message);
             return -1;
         }
 
-        $shortName = $args['shortName'];
+        $shortName = $this->argument('orgShortName');
         if (!$shortName) {
             $message = 'org short name required';
             $this->error($message);
+            Log::error($message);
             return -1;
         }
 
-        $this->info('command tenant init database');
-        $eventUserRegistered = new UserRegistered(
-            $user,
-            $args['orgName'],
-            $args['shortName'],
-        );
-        event($eventUserRegistered);
 
-        return 0;
+        OrgService::dispatchCreateOrgBy($user, $orgName, $shortName);
+
+        return 1;
     }
 
 

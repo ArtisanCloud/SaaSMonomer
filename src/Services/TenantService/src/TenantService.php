@@ -319,9 +319,15 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchCreateTenantBy(Org $org): PendingDispatch
     {
-        return CreateTenant::dispatch($org)
+        Log::info($org->name . ': Job ready to dispatch create tenant');
+
+        $dispatch = CreateTenant::dispatch($org)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
+
+        Log::info($org->name . ': Job finish to dispatch create tenant');
+
+        return $dispatch;
     }
 
     /**
@@ -333,9 +339,15 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchProcessTenantDatabase(Tenant $tenant): PendingDispatch
     {
-        return ProcessTenantDatabase::dispatch($tenant)
+        Log::info($tenant->subdomain . ': Job ready to dispatch process tenant database');
+
+        $dispatch = ProcessTenantDatabase::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
+
+        Log::info($tenant->subdomain . ': Job finish to dispatch process tenant database');
+
+        return $dispatch;
     }
 
     /**
@@ -347,9 +359,16 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchMigrateTenant(Tenant $tenant): PendingDispatch
     {
-        return MigrateTenant::dispatch($tenant)
+        Log::info($tenant->subdomain . ': Job ready to dispatch migrate tenant ');
+
+        $dispatch = MigrateTenant::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
+
+        Log::info($tenant->subdomain . ': Job finish to dispatch migrate tenant ');
+
+        return $dispatch;
+
     }
 
     /**
@@ -361,9 +380,15 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchSeedTenantDemo(Tenant $tenant): PendingDispatch
     {
-        return SeedTenantDemo::dispatch($tenant)
+        Log::info($tenant->subdomain . ": Job Ready to seed tenant demo");
+
+        $dispatch = SeedTenantDemo::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
+
+        Log::info($tenant->subdomain . ': Job finish to dispatch seed tenant demo');
+
+        return $dispatch;
     }
 
 
