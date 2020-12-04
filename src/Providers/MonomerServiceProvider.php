@@ -43,6 +43,8 @@ class MonomerServiceProvider extends ServiceProvider
         $this->app->register(LandlordServiceProvider::class);
         $this->app->register(TenantServiceProvider::class);
         $this->app->register(TeamServiceProvider::class);
+
+        include_once(__DIR__.'/../../config/constant.php');
     }
 
     /**
@@ -52,6 +54,9 @@ class MonomerServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
+        $this->loadTranslations();
+
         // config framework router
         $this->configRouter();
 
@@ -62,6 +67,13 @@ class MonomerServiceProvider extends ServiceProvider
 
         }
     }
+
+    public function loadTranslations()
+    {
+        $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', USER_LANG);
+    }
+
+
     public function configRouter()
     {
 

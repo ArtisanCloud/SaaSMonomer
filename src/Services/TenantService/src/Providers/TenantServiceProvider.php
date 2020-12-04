@@ -37,7 +37,6 @@ class TenantServiceProvider extends ServiceProvider
     public function boot()
     {
 
-        $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', TENANT_LANG);
 
         if ($this->app->runningInConsole()) {
             // publish config file
@@ -45,6 +44,11 @@ class TenantServiceProvider extends ServiceProvider
             $this->publishMigration();
         }
 
+    }
+
+    public function loadTranslations()
+    {
+        $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', TENANT_LANG);
     }
 
     public function publishConfig()

@@ -20,6 +20,8 @@ class CheckUser
     {
         $this->userService = $userService;
         $this->apiResponse = $APIResponse;
+
+        $this->apiResponse->setLocaleNamespace(USER_LANG);
     }
 
     /**
@@ -44,15 +46,16 @@ class CheckUser
         // load auth user into session
         $user = $this->userService->loadUserByLandlord($artisan, $sessionLandlord);
 //        dd($user,$this->userService);
-        if(!is_null($user) && !$user->isValid()){
-            $this->setCode(API_ERR_CODE_INVALID_LOGIN_USER);
+        if(!is_null($user) && $user->isInvalid()){
+
+            $this->apiResponse->setCode(API_ERR_CODE_INVALID_LOGIN_USER);
         }else{
             UserService::setAuthUser($user);
         }
 
         if(!$this->apiResponse->isNoError()){
             // we can log here and check where access our server with invalid request
-            return $apiResponse->toJson();
+            return $this->apiResponse->toJson();
         }
 
         return $next($request);
