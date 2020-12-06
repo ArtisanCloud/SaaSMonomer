@@ -4,11 +4,14 @@ declare(strict_types=1);
 namespace ArtisanCloud\SaaSMonomer\Console\Commands\Tenant;
 
 use App\Models\User;
+use App\Notifications\ArtisanRegistered;
 use App\Services\UserService\UserService;
 use ArtisanCloud\SaaSPolymer\Events\UserRegistered;
+use ArtisanCloud\UBT\UBT;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
 
@@ -48,6 +51,8 @@ class Init extends Command
      */
     public function handle(): int
     {
+
+
         $args = $this->arguments();
 //        dd($this->arguments());
 //        dd($this->options());
@@ -70,6 +75,13 @@ class Init extends Command
             $this->error('please input a init user');
             return -1;
         }
+        
+        Notification::route('mail','hbj418@gmail.com')->notify(new ArtisanRegistered());
+        return 1;
+
+        UBT::info('test from ll', ['user' => '123']);
+        $this->info('sent');
+        return 1;
 
         $orgName = $args['orgName'];
         if (!$orgName) {
