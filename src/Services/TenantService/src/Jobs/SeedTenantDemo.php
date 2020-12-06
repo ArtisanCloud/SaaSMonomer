@@ -5,6 +5,7 @@ namespace ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs;
 use App\Models\User;
 use App\Services\UserService\UserService;
 
+use ArtisanCloud\SaaSFramework\Notifications\ArtisanRegistered;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
@@ -87,7 +88,18 @@ class SeedTenantDemo implements ShouldQueue
             report($e);
         }
 
-        Log::info("user will received a email to login");
+        if ($user) {
+            $notifictaion = (new ArtisanRegistered())
+                ->onConnection('redis-mail')
+                ->onQueue('mailer');
+//        dd($notifictaion);
+            $user->notify($notifictaion);
+
+//        UBT::info('test from ll', ['user' => '123']);
+//        $this->info('sent');
+
+            Log::info("user will received a email to login");
+        }
 
         return $bResult;
 
