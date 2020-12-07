@@ -7,7 +7,8 @@ use App\Models\User;
 use ArtisanCloud\SaaSFramework\Notifications\ArtisanRegistered;
 use App\Services\UserService\UserService;
 use ArtisanCloud\SaaSPolymer\Events\UserRegistered;
-use ArtisanCloud\UBT\UBT;
+
+use ArtisanCloud\UBT\Facades\UBT;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -55,7 +56,7 @@ class Init extends Command
 //        UBT::info('test from ll', ['user' => '123']);
 //        $ubt = new UBT();
 //        $ubt->info('test from ll', ['user' => '123']);
-
+        UBT::info('test from ll', ['user' => '123']);
         $this->info('sent');
         return 1;
 
