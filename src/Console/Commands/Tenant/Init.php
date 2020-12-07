@@ -54,9 +54,10 @@ class Init extends Command
     {
 
 //        UBT::info('test from ll', ['user' => '123']);
-//        $ubt = new UBT();
+//        $ubt = new \ArtisanCloud\UBT\UBT();
 //        $ubt->info('test from ll', ['user' => '123']);
-        UBT::info('test from ll', ['user' => '123']);
+//        UBT::info('test from 11', ['user' => '123']);
+        UBT::info('test from 22', ['user' => '123']);
         $this->info('sent');
         return 1;
 

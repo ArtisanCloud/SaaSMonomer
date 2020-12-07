@@ -8,6 +8,7 @@ use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
+use ArtisanCloud\UBT\Facades\UBT;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -63,7 +64,7 @@ class MigrateTenant implements ShouldQueue
 
         //
         $bResult = false;
-        Log::info($this->tenant->org->name . ": Job migrate Tenant table:{$this->tenant->uuid}");
+        UBT::info(" Job migrate Tenant table:{$this->tenant->uuid}", ['orgName' => $this->tenant->org->name]);
 
         try {
             if ($this->tenantService->isDatabaseSchemaCreated()) {
@@ -71,7 +72,7 @@ class MigrateTenant implements ShouldQueue
                 // seed tenant demo
                 $bResult = $this->tenantService->migrateTenant($this->tenant);
                 if ($bResult) {
-                    Log::info($this->tenant->org->name . ": Job succeed to migrate database");
+                    UBT::info("Job succeed to migrate database", ['orgName' => $this->tenant->org->name]);
 
                     // save tenant status
                     $this->tenant->status = Tenant::STATUS_MIGRATED_DATABASE;
@@ -82,21 +83,18 @@ class MigrateTenant implements ShouldQueue
                 }
 
             } else {
-                Log::warning($this->tenant->org->name . ": Job User tenant schema not created");
+                UBT::warning("Job User tenant schema not created", ['orgName' => $this->tenant->org->name]);
             }
 
         } catch (Throwable $e) {
 //                dd($e);
-            Log::alert($this->tenant->org->name . ": Job " . $e->getMessage());
+            UBT::alert( "Job " . $e->getMessage(),  ['orgName'=>$this->tenant->org->name]);
             $bResult = false;
             report($e);
         }
 
         if ($bResult) {
-
-            Log::info($this->tenant->org->name . ": Job Ready to dispatch seed tenant demo");
             TenantService::dispatchSeedTenantDemo($this->tenant);
-            Log::info($this->tenant->org->name . ": Job finish to dispatch seed tenant demo");
         }
 
 
@@ -113,7 +111,7 @@ class MigrateTenant implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error($this->tenant->org->name . ": Job migrate tenant database error: " . $exception->getMessage());
+        UBT::sendError($exception);
     }
 
 }

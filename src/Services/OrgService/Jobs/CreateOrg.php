@@ -12,6 +12,7 @@ use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\ProcessTenantDataba
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
 
+use ArtisanCloud\UBT\Facades\UBT;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -62,7 +63,7 @@ class CreateOrg implements ShouldQueue
     public function handle()
     {
         //
-        Log::info($this->user->mobile . ': Job handle create org for user');
+        UBT::info('Job handle create org for user', ['mobile' => $this->user->mobile]);
 
         $org = \DB::connection()->transaction(function () {
             try {
@@ -91,7 +92,10 @@ class CreateOrg implements ShouldQueue
             TenantService::dispatchCreateTenantBy($org);
         }
 
-        Log::info($org->name . ' finish create org'.$org->uuid);
+        UBT::info('finish create org', [
+            'mobile' => $this->user->mobile,
+            'orgName' => $org->name,
+        ]);
 
 
     }
@@ -105,7 +109,7 @@ class CreateOrg implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error($this->user->mobile . ': create org error: ' . $exception->getMessage());
+        UBT::sendError($exception);
     }
 
 }

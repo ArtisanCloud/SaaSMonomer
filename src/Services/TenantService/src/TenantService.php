@@ -12,6 +12,7 @@ use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\ProcessTenantDataba
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Jobs\SeedTenantDemo;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
+use ArtisanCloud\UBT\Facades\UBT;
 use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
@@ -319,13 +320,13 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchCreateTenantBy(Org $org): PendingDispatch
     {
-        Log::info($org->name . ': Job ready to dispatch create tenant');
+        UBT::info(': Job ready to dispatch create tenant', ['orgName' => $org->name]);
 
         $dispatch = CreateTenant::dispatch($org)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
 
-        Log::info($org->name . ': Job finish to dispatch create tenant');
+        UBT::info('Job finish to dispatch create tenant', ['orgName' => $org->name]);
 
         return $dispatch;
     }
@@ -339,13 +340,13 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchProcessTenantDatabase(Tenant $tenant): PendingDispatch
     {
-        Log::info($tenant->subdomain . ': Job ready to dispatch process tenant database');
+        UBT::info('Job ready to dispatch process tenant database', ['tenantSubDomain' => $tenant->subdomain]);
 
         $dispatch = ProcessTenantDatabase::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
 
-        Log::info($tenant->subdomain . ': Job finish to dispatch process tenant database');
+        UBT::info(': Job finish to dispatch process tenant database', ['tenantSubDomain' => $tenant->subdomain]);
 
         return $dispatch;
     }
@@ -359,13 +360,13 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchMigrateTenant(Tenant $tenant): PendingDispatch
     {
-        Log::info($tenant->subdomain . ': Job ready to dispatch migrate tenant ');
+        UBT::info('Job ready to dispatch migrate tenant ', ['subdomain' => $tenant->subdomain]);
 
         $dispatch = MigrateTenant::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
 
-        Log::info($tenant->subdomain . ': Job finish to dispatch migrate tenant ');
+        Log::info(': Job finish to dispatch migrate tenant ', ['subdomain' => $tenant->subdomain]);
 
         return $dispatch;
 
@@ -380,13 +381,13 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchSeedTenantDemo(Tenant $tenant): PendingDispatch
     {
-        Log::info($tenant->subdomain . ": Job Ready to seed tenant demo");
+        UBT::info(": Job Ready to seed tenant demo", ['subdomain' => $tenant->subdomain]);
 
         $dispatch = SeedTenantDemo::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
 
-        Log::info($tenant->subdomain . ': Job finish to dispatch seed tenant demo');
+        UBT::info(': Job finish to dispatch seed tenant demo', ['subdomain' => $tenant->subdomain]);
 
         return $dispatch;
     }

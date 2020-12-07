@@ -7,6 +7,7 @@ use ArtisanCloud\SaaSMonomer\Services\OrgService\Contracts\OrgServiceContract;
 use ArtisanCloud\SaaSFramework\Services\ArtisanCloudService;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\Jobs\CreateOrg;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\Models\Org;
+use ArtisanCloud\UBT\Facades\UBT;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -69,13 +70,13 @@ class OrgService extends ArtisanCloudService implements OrgServiceContract
      */
     public static function dispatchCreateOrgBy(User $user, string $orgName, string $shortName, $standalone = true)
     {
-        Log::info($user->mobile . ': Job ready to dispatch create org');
+        UBT::info('Job ready to dispatch create org', ['mobile' => $user->mobile]);
 
         return CreateOrg::dispatch($user, $orgName, $shortName, $standalone)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
 
-        Log::info($user->mobile . ': Job finish to dispatch create org');
+        UBT::info('Job finish to dispatch create org', ['mobile' => $user->mobile]);
     }
 
 

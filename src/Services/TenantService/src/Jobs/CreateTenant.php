@@ -6,6 +6,7 @@ use ArtisanCloud\SaaSFramework\Exceptions\BaseException;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\Models\Org;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
+use ArtisanCloud\UBT\Facades\UBT;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -48,13 +49,16 @@ class CreateTenant implements ShouldQueue
     public function handle()
     {
         //
-        Log::info($this->org->creator->mobile . ': Job handle create tenant for org: ' . $this->org->name);
+        UBT::info(': Job handle create tenant for org: ', [
+            'mobile' => $this->org->creator->mobile,
+            'orgName' => $this->org->name,
+        ]);
 
         $this->org->load('tenant');
         if (!is_null($this->org->tenant)) {
-            Log::info(
-                $this->org->name . ': Org had already created tenant '
-                . ', which tenant status is ' . $this->org->tenant->status
+            UBT::info(
+                'Org had already created tenant, which tenant status is ' . $this->org->tenant->status,
+                ['orgName' => $this->org->name]
             );
             return false;
         }
@@ -93,7 +97,7 @@ class CreateTenant implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error($this->org->creator->mobile . ': create tenant error: ' . $exception->getMessage());
+        UBT::sendError($exception);
     }
 
 }

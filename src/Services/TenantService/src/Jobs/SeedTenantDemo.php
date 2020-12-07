@@ -9,6 +9,7 @@ use ArtisanCloud\SaaSFramework\Notifications\ArtisanRegistered;
 use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
+use ArtisanCloud\UBT\Facades\UBT;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -61,7 +62,10 @@ class SeedTenantDemo implements ShouldQueue
 
         //
         $bResult = false;
-        Log::info("Job seed Org:{$this->tenant->org->name} Tenant Demo:{$this->tenant->uuid}");
+        UBT::info("Seed Tenant Demo", [
+            'orgName' => $this->tenant->org->name,
+            'tenantUuid' => $this->tenant->uuid,
+        ]);
 
         try {
             if ($this->tenantService->isDatabaseMigrated()) {
@@ -71,7 +75,7 @@ class SeedTenantDemo implements ShouldQueue
                 if (!$bResult) {
                     throw new \Exception('"Org Name: {$this->tenant->org->name}  failed to seed demo, please email amdin"');
                 }
-                Log::info("Org Name: {$this->tenant->org->name}  succeed to seed demo");
+                UBT::info("succeed to seed demo", ['orgName' => $this->tenant->org->name]);
 
                 // update user status
                 $user = $this->tenant->org->creator;
@@ -79,12 +83,12 @@ class SeedTenantDemo implements ShouldQueue
                 $user->save();
 
             } else {
-                Log::warning($this->tenant->org->name . ": Job User tenant is not migrated");
+                UBT::warning("Job User tenant is not migrated", ['orgName' => $this->tenant->org->name]);
             }
 
         } catch (Throwable $e) {
 //                dd($e);
-            Log::alert($e->getMessage());
+            UBT::alert($e->getMessage());
             report($e);
         }
 
@@ -95,7 +99,7 @@ class SeedTenantDemo implements ShouldQueue
 //        dd($notifictaion);
             $user->notify($notifictaion);
 
-            Log::info("user will received a email to login");
+            UBT::info("user will received a email to login");
         }
 
         return $bResult;
@@ -111,7 +115,7 @@ class SeedTenantDemo implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error('seed tenant demo error: ' . $exception->getMessage());
+        UBT::sendError($exception);
     }
 
 }

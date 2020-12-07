@@ -8,6 +8,7 @@ use ArtisanCloud\SaaSMonomer\Services\OrgService\OrgService;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\Tenant;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\Models\TenantModel;
 use ArtisanCloud\SaaSMonomer\Services\TenantService\src\TenantService;
+use ArtisanCloud\UBT\Facades\UBT;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -60,7 +61,7 @@ class ProcessTenantDatabase implements ShouldQueue
         $this->tenantService->setConnection($this->tenant);
 
         $bResult = false;
-        Log::info($this->tenant->org->name . ": Job process Tenant database:{$this->tenant->uuid}");
+        UBT::info("Job process Tenant database:{$this->tenant->uuid}", ['orgName' => $this->tenant->org->name]);
 
         try {
             // create tenant database
@@ -68,7 +69,7 @@ class ProcessTenantDatabase implements ShouldQueue
 
                 $bResult = $this->tenantService->createDatabase($this->tenant);
                 if ($bResult) {
-                    Log::info($this->tenant->org->name . ": Job succeed to create database");
+                    UBT::info("Job succeed to create database", ['orgName' => $this->tenant->org->name]);
 
                     // save tenant status
                     $this->tenant->status = Tenant::STATUS_CREATED_DATABASE;
@@ -79,7 +80,7 @@ class ProcessTenantDatabase implements ShouldQueue
                 }
 
             } else {
-                Log::warning($this->tenant->org->name . ": Job User is not init or user has create a tenant database");
+                UBT::warning("Job User is not init or user has create a tenant database", ['orgName' => $this->tenant->org->name]);
             }
 
             $bResult = false;
@@ -87,7 +88,7 @@ class ProcessTenantDatabase implements ShouldQueue
             if ($this->tenantService->isDatabaseCreated($this->tenant)) {
                 $bResult = $this->tenantService->createDatabaseAccount($this->tenant);
                 if ($bResult) {
-                    Log::info($this->tenant->org->name . ": Job succeed to create database account");
+                    UBT::info("Job succeed to create database account", ['orgName' => $this->tenant->org->name]);
 
                     // save tenant status
                     $this->tenant->status = Tenant::STATUS_CREATED_ACCOUNT;
@@ -97,7 +98,7 @@ class ProcessTenantDatabase implements ShouldQueue
                     throw new \Exception($this->tenant->org->name . ": Job failed to create database account, please email amdin");
                 }
             } else {
-                Log::warning($this->tenant->org->name . ": Job Tenant database is not created");
+                UBT::warning("Job Tenant database is not created", ['orgName' => $this->tenant->org->name]);
             }
 
             $bResult = false;
@@ -106,7 +107,7 @@ class ProcessTenantDatabase implements ShouldQueue
 
                 $bResult = $this->tenantService->createSchema($this->tenant->schema);
                 if ($bResult) {
-                    Log::info($this->tenant->org->name . ": Job succeed to create schema");
+                    UBT::info("Job succeed to create schema", ['orgName' => $this->tenant->org->name]);
 
                     // save tenant status
                     $this->tenant->status = Tenant::STATUS_CREATED_SCHEMA;
@@ -116,19 +117,19 @@ class ProcessTenantDatabase implements ShouldQueue
                     throw new \Exception($this->tenant->org->name . ": Job failed to create schema, please email amdin");
                 }
             } else {
-                Log::warning($this->tenant->org->name . ": Job Tenant account is not created");
+                UBT::warning("Job Tenant account is not created", ['orgName' => $this->tenant->org->name]);
             }
 
 
         } catch (Throwable $e) {
 //                dd($e);
-            Log::alert($e->getMessage());
+            UBT::alert($e->getMessage());
             $bResult = false;
             report($e);
         }
 
         if ($bResult) {
-            
+
             TenantService::dispatchMigrateTenant($this->tenant);
         }
 
@@ -145,7 +146,7 @@ class ProcessTenantDatabase implements ShouldQueue
     public function failed(Throwable $exception)
     {
         // Send user notification of failure, etc...
-        Log::error($this->tenant->org->name . ": Job process tenant database error: " . $exception->getMessage());
+        UBT::sendError($exception);
     }
 
 }
