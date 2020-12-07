@@ -52,6 +52,12 @@ class Init extends Command
     public function handle(): int
     {
 
+//        UBT::info('test from ll', ['user' => '123']);
+//        $ubt = new UBT();
+//        $ubt->info('test from ll', ['user' => '123']);
+
+        $this->info('sent');
+        return 1;
 
         $args = $this->arguments();
 //        dd($this->arguments());

@@ -95,9 +95,6 @@ class SeedTenantDemo implements ShouldQueue
 //        dd($notifictaion);
             $user->notify($notifictaion);
 
-//        UBT::info('test from ll', ['user' => '123']);
-//        $this->info('sent');
-
             Log::info("user will received a email to login");
         }
 
