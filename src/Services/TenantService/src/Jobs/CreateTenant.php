@@ -49,7 +49,7 @@ class CreateTenant implements ShouldQueue
     public function handle()
     {
         //
-        UBT::info(': Job handle create tenant for org: ', [
+        UBT::info('Job handle create tenant for org: ', [
             'mobile' => $this->org->creator->mobile,
             'orgName' => $this->org->name,
         ]);

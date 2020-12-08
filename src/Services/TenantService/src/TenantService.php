@@ -320,7 +320,7 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchCreateTenantBy(Org $org): PendingDispatch
     {
-        UBT::info(': Job ready to dispatch create tenant', ['orgName' => $org->name]);
+        UBT::info('Job ready to dispatch create tenant', ['orgName' => $org->name]);
 
         $dispatch = CreateTenant::dispatch($org)
             ->onConnection('redis-tenant')
@@ -381,13 +381,13 @@ class TenantService extends ArtisanCloudService implements TenantServiceContract
      */
     public static function dispatchSeedTenantDemo(Tenant $tenant): PendingDispatch
     {
-        UBT::info(": Job Ready to seed tenant demo", ['subdomain' => $tenant->subdomain]);
+        UBT::info("Job Ready to seed tenant demo", ['subdomain' => $tenant->subdomain]);
 
         $dispatch = SeedTenantDemo::dispatch($tenant)
             ->onConnection('redis-tenant')
             ->onQueue('tenant-database');
 
-        UBT::info(': Job finish to dispatch seed tenant demo', ['subdomain' => $tenant->subdomain]);
+        UBT::info('Job finish to dispatch seed tenant demo', ['subdomain' => $tenant->subdomain]);
 
         return $dispatch;
     }
