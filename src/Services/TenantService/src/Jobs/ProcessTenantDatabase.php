@@ -34,10 +34,12 @@ class ProcessTenantDatabase implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Tenant $tenant)
+    public function __construct(Tenant $tenant, bool $isStandalone = false)
     {
         //init tenant
         $this->tenant = $tenant;
+
+        $this->isStandalone = $isStandalone;
 
         // load tenant service
         $this->tenantService = resolve(TenantService::class);

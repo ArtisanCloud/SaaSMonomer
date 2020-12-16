@@ -31,7 +31,7 @@ class CreateOrg implements ShouldQueue
     public string $orgName;
     public string $shortName;
     public bool $isStandalone;
-    protected OrgService $orgService;
+    public OrgService $orgService;
 
     /**
      * Create a new job instance.
@@ -83,9 +83,11 @@ class CreateOrg implements ShouldQueue
 //                dd($e);
                 report($e);
             }
+
             return $org;
 
         });
+
 
         if (!$this->isStandalone && $org) {
             // to create user org
@@ -96,9 +98,8 @@ class CreateOrg implements ShouldQueue
             'mobile' => $this->user->mobile,
             'orgName' => $org->name,
         ]);
-
-
     }
+
 
     /**
      * Handle a job failure.

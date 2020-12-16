@@ -24,6 +24,7 @@ class SeedTenantDemo implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public bool $isStandalone;
     public Tenant $tenant;
     protected TenantService $tenantService;
 
@@ -34,10 +35,12 @@ class SeedTenantDemo implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Tenant $tenant)
+    public function __construct(Tenant $tenant, bool $isStandalone = false)
     {
         //init tenant
         $this->tenant = $tenant;
+
+        $this->isStandalone = $isStandalone;
 
         // load tenant service
         $this->tenantService = resolve(TenantService::class);
@@ -92,7 +95,7 @@ class SeedTenantDemo implements ShouldQueue
             report($e);
         }
 
-        if ($user) {
+        if (!$this->isStandalone && $user) {
             $notifictaion = (new ArtisanRegistered())
                 ->onConnection('redis-mail')
                 ->onQueue('mailer');

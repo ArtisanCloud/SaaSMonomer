@@ -25,6 +25,7 @@ class MigrateTenant implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public bool $isStandalone;
     public Tenant $tenant;
     protected TenantService $tenantService;
 
@@ -35,12 +36,13 @@ class MigrateTenant implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Tenant $tenant)
+    public function __construct(Tenant $tenant, bool $isStandalone = false)
     {
         //init tenant
         $this->tenant = $tenant;
 
         // load tenant service
+        $this->isStandalone = $isStandalone;
         $this->tenantService = resolve(TenantService::class);
         $this->tenantService->setModel($this->tenant);
 
@@ -88,12 +90,12 @@ class MigrateTenant implements ShouldQueue
 
         } catch (Throwable $e) {
 //                dd($e);
-            UBT::alert( "Job " . $e->getMessage(),  ['orgName'=>$this->tenant->org->name]);
+            UBT::alert("Job " . $e->getMessage(), ['orgName' => $this->tenant->org->name]);
             $bResult = false;
             report($e);
         }
 
-        if ($bResult) {
+        if (!$this->isStandalone && $bResult) {
             TenantService::dispatchSeedTenantDemo($this->tenant);
         }
 

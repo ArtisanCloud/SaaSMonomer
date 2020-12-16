@@ -21,8 +21,9 @@ class CreateTenant implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public bool $isStandalone;
     public Org $org;
-    protected TenantService $tenantService;
+    public TenantService $tenantService;
 
     /**
      * Create a new job instance.
@@ -31,11 +32,11 @@ class CreateTenant implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Org $org)
+    public function __construct(Org $org, bool $isStandalone = false)
     {
         //
         $this->org = $org;
-
+        $this->isStandalone = $isStandalone;
         $this->org->loadMissing('creator');
 
         $this->tenantService = resolve(TenantService::class);
@@ -60,7 +61,7 @@ class CreateTenant implements ShouldQueue
                 'Org had already created tenant, which tenant status is ' . $this->org->tenant->status,
                 ['orgName' => $this->org->name]
             );
-            return false;
+            return;
         }
 
         $tenant = \DB::connection()->transaction(function () {
@@ -81,11 +82,10 @@ class CreateTenant implements ShouldQueue
         });
 //        dd($tenant);
 
-        if ($tenant) {
+        if (!$this->isStandalone && $tenant) {
             TenantService::dispatchProcessTenantDatabase($tenant);
         }
 
-        return true;
     }
 
     /**
