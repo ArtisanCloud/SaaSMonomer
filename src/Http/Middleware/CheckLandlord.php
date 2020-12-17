@@ -28,8 +28,8 @@ class CheckLandlord
      */
     public function handle($request, Closure $next)
     {
-        $host = $request->server('HTTP_HOST');
-//        $servier = $request->server('SERVER_NAME');
+//        $host = $request->server('HTTP_HOST');
+        $host = $request->server('SERVER_NAME');
 //        dd($host);
 
         $landlord = $this->landlordService->getCachedModelForClientByKey('domain', $host);
