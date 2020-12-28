@@ -68,32 +68,36 @@ class MigrateTenant implements ShouldQueue
         $bResult = false;
         UBT::info(" Job migrate Tenant table:{$this->tenant->uuid}", ['orgName' => $this->tenant->org->name]);
 
-        try {
-            if ($this->tenantService->isDatabaseSchemaCreated()) {
+        $tenant = \DB::connection(TenantModel::getConnectionNameStatic())->transaction(function () {
 
-                // seed tenant demo
-                $bResult = $this->tenantService->migrateTenant($this->tenant);
-                if ($bResult) {
-                    UBT::info("Job succeed to migrate database", ['orgName' => $this->tenant->org->name]);
+            try {
+                if ($this->tenantService->isDatabaseSchemaCreated()) {
 
-                    // save tenant status
-                    $this->tenant->status = Tenant::STATUS_MIGRATED_DATABASE;
-                    $bResult = $this->tenant->save();
+                    // seed tenant demo
+                    $bResult = $this->tenantService->migrateTenant($this->tenant);
+                    if ($bResult) {
+                        UBT::info("Job succeed to migrate database", ['orgName' => $this->tenant->org->name]);
+
+                        // save tenant status
+                        $this->tenant->status = Tenant::STATUS_MIGRATED_DATABASE;
+                        $bResult = $this->tenant->save();
+
+                    } else {
+                        throw new \Exception($this->tenant->org->name . ": failed to migrate table, please email amdin");
+                    }
 
                 } else {
-                    throw new \Exception($this->tenant->org->name . ": failed to migrate table, please email amdin");
+                    UBT::warning("Job User tenant schema not created", ['orgName' => $this->tenant->org->name]);
                 }
 
-            } else {
-                UBT::warning("Job User tenant schema not created", ['orgName' => $this->tenant->org->name]);
-            }
-
-        } catch (Throwable $e) {
+            } catch (Throwable $e) {
 //                dd($e);
-            UBT::alert("Job " . $e->getMessage(), ['orgName' => $this->tenant->org->name]);
-            $bResult = false;
-            report($e);
-        }
+                UBT::alert("Job " . $e->getMessage(), ['orgName' => $this->tenant->org->name]);
+                $bResult = false;
+                report($e);
+            }
+        });
+
 
         if (!$this->isStandalone && $bResult) {
             TenantService::dispatchSeedTenantDemo($this->tenant);
